@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { ALL_PRODUCT_TYPES, ALL_SIZES } from '@/lib/product-config';
 
 const ProductSchema = new mongoose.Schema({
   name: {
@@ -34,9 +35,18 @@ const ProductSchema = new mongoose.Schema({
     required: [true, 'Please select a category'],
   },
 
+  // Top-level garment family keeps shared product data reusable as the catalog grows.
+  // The default preserves all products created before this field was introduced.
+  garmentType: {
+    type: String,
+    enum: ['tshirt', 'trouser'],
+    required: true,
+    default: 'tshirt',
+  },
+
   productType: {
     type: String,
-    enum: ['polo', 'half-sleeve', 'full-sleeve', 'v-neck', 'round-neck', 'henley', 'tank-top'],
+    enum: ALL_PRODUCT_TYPES,
     required: [true, 'Please select a product type'],
   },
 
@@ -44,7 +54,7 @@ const ProductSchema = new mongoose.Schema({
   sizes: [{
     size: {
       type: String,
-      enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
+      enum: ALL_SIZES,
       required: true,
     },
     stock: {
@@ -138,6 +148,33 @@ const ProductSchema = new mongoose.Schema({
   sleeveLength: {
     type: String,
     enum: ['short', 'long', 'sleeveless', '3/4'],
+  },
+  trouserDetails: {
+    rise: {
+      type: String,
+      enum: ['low', 'mid', 'high'],
+    },
+    legStyle: {
+      type: String,
+      enum: ['skinny', 'slim', 'straight', 'tapered', 'wide', 'bootcut'],
+    },
+    waistType: {
+      type: String,
+      enum: ['fixed', 'elasticated', 'drawstring', 'adjustable'],
+    },
+    closure: {
+      type: String,
+      enum: ['button', 'zip', 'drawstring', 'hook-and-bar', 'elastic'],
+    },
+    length: {
+      type: String,
+      enum: ['short', 'regular', 'long'],
+    },
+    pockets: {
+      type: Number,
+      min: [0, 'Pockets cannot be negative'],
+      default: 2,
+    },
   },
   pattern: {
     type: String,
@@ -245,7 +282,7 @@ ProductSchema.pre('save', function(next) {
 // Create indexes for better query performance
 ProductSchema.index({ name: 'text', description: 'text' });
 ProductSchema.index({ category: 1, status: 1 });
-ProductSchema.index({ slug: 1 });
+ProductSchema.index({ garmentType: 1, status: 1 });
 ProductSchema.index({ 'sizes.price': 1 });
 ProductSchema.index({ basePrice: 1 });
 ProductSchema.index({ featured: 1, status: 1 });

@@ -1,8 +1,8 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Naksh - Premium T-Shirts',
-  description: 'Shop premium quality t-shirts, polos, and more',
+  title: 'Naksh - Premium Clothing',
+  description: 'Shop premium quality T-shirts, trousers, polos, and more',
 };
 
 export default function RootLayout({ children }) {

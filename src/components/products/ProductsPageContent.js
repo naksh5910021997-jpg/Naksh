@@ -17,6 +17,7 @@ export default function ProductsPageContent() {
 
   // Initialize filters from URL params
   const [filters, setFilters] = useState({
+    garmentType: searchParams.get('garmentType') || '',
     category: searchParams.get('category') || '',
     type: searchParams.get('type') || '',
     fit: searchParams.get('fit') || '',
@@ -108,6 +109,7 @@ export default function ProductsPageContent() {
 
   const clearAllFilters = () => {
     const clearedFilters = {
+      garmentType: '',
       category: '',
       type: '',
       fit: '',
@@ -190,6 +192,13 @@ export default function ProductsPageContent() {
               <span className="bg-card-bg border border-accent-dim px-3 py-1 rounded-sm text-xs font-bold text-text flex items-center gap-2">
                 Category: {categories.find(c => c._id === filters.category)?.name || filters.category}
                 <button onClick={() => handleFilterChange({ category: '' })} className="text-text opacity-60 hover:opacity-100">×</button>
+              </span>
+            )}
+
+            {filters.garmentType && (
+              <span className="bg-card-bg border border-accent-dim px-3 py-1 rounded-sm text-xs font-bold text-text flex items-center gap-2">
+                Garment: {filters.garmentType === 'trouser' ? 'Trouser' : 'T-Shirt'}
+                <button onClick={() => handleFilterChange({ garmentType: '', type: '' })} className="text-text opacity-60 hover:opacity-100">×</button>
               </span>
             )}
 

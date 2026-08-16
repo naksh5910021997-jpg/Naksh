@@ -193,7 +193,7 @@ export default async function ProductDetailPage({ params }) {
             {product.sizes && product.sizes.length > 0 && (
               <div>
                 <h3 className="text-[10px] uppercase tracking-widest font-black mb-4 text-text opacity-60">
-                  Available Sizes
+                  {product.garmentType === 'trouser' ? 'Available Waist Sizes' : 'Available Sizes'}
                 </h3>
                 <div className="grid grid-cols-3 gap-3">
                   {product.sizes.map((size, i) => (
@@ -273,10 +273,22 @@ export default async function ProductDetailPage({ params }) {
             {/* Specs Table */}
             <div className="pt-6 space-y-3">
                {[
-                 { label: 'SKU', value: product.sku },
+                 { label: 'SKU', value: product.productSku || product.sku },
+                 { label: 'Garment', value: product.garmentType === 'trouser' ? 'Trouser' : 'T-Shirt' },
                  { label: 'Category', value: product.category?.name, link: `/categories/${product.category?.slug}` },
                  { label: 'Origin', value: product.madeIn },
                  { label: 'Type', value: product.productType?.replace('-', ' ') },
+                 ...(product.garmentType === 'trouser' ? [
+                   { label: 'Rise', value: product.trouserDetails?.rise },
+                   { label: 'Leg Style', value: product.trouserDetails?.legStyle },
+                   { label: 'Waist', value: product.trouserDetails?.waistType },
+                   { label: 'Closure', value: product.trouserDetails?.closure },
+                   { label: 'Length', value: product.trouserDetails?.length },
+                   { label: 'Pockets', value: product.trouserDetails?.pockets },
+                 ] : [
+                   { label: 'Neckline', value: product.neckline },
+                   { label: 'Sleeve', value: product.sleeveLength },
+                 ]),
                  { label: 'Total Stock', value: product.sizes?.reduce((sum, size) => sum + (size.stock || 0), 0) || product.stock || 0 }
                ].map((spec, i) => spec.value && (
                  <div key={i} className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest py-2 border-b border-accent-dim">

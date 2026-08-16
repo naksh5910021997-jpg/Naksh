@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useSearchParams, useRouter } from 'next/navigation';
+import {
+  GARMENT_TYPES,
+  PRODUCT_TYPES,
+  SIZE_OPTIONS,
+  TROUSER_OPTIONS,
+  getDefaultSizeVariants,
+} from '@/lib/product-config';
 
 export default function ProductForm({ product = null }) {
   const router = useRouter();
@@ -13,19 +20,30 @@ export default function ProductForm({ product = null }) {
   const [activeTab, setActiveTab] = useState('core');
   const editId = searchParams.get('edit');
   const isEditing = !!editId;
+  const requestedGarmentType = searchParams.get('garmentType') === 'trouser' ? 'trouser' : 'tshirt';
+  const initialGarmentType = product?.garmentType || requestedGarmentType;
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
     shortDescription: product?.shortDescription || '',
     basePrice: product?.basePrice || '', // Changed from price to basePrice
     category: product?.category?._id || '',
-    productType: product?.productType || 'half-sleeve',
+    garmentType: initialGarmentType,
+    productType: product?.productType || PRODUCT_TYPES[initialGarmentType][0].value,
     material: product?.material || '100% Cotton',
     fabricType: product?.fabricType || 'cotton',
     gsm: product?.gsm || '',
     fit: product?.fit || 'regular',
     neckline: product?.neckline || 'round',
     sleeveLength: product?.sleeveLength || 'short',
+    trouserDetails: product?.trouserDetails || {
+      rise: 'mid',
+      legStyle: 'straight',
+      waistType: 'fixed',
+      closure: 'button',
+      length: 'regular',
+      pockets: 2,
+    },
     pattern: product?.pattern || 'solid',
     brand: product?.brand || 'Naksh',
     madeIn: product?.madeIn || 'India',
@@ -36,12 +54,7 @@ export default function ProductForm({ product = null }) {
     barcode: product?.barcode || '',
     images: product?.images || [],
     // Updated sizes structure with individual pricing
-    sizes: product?.sizes || [
-      { size: 'S', stock: 0, price: '', comparePrice: '', salePrice: '', onSale: false, sku: '' },
-      { size: 'M', stock: 0, price: '', comparePrice: '', salePrice: '', onSale: false, sku: '' },
-      { size: 'L', stock: 0, price: '', comparePrice: '', salePrice: '', onSale: false, sku: '' },
-      { size: 'XL', stock: 0, price: '', comparePrice: '', salePrice: '', onSale: false, sku: '' },
-    ],
+    sizes: product?.sizes?.length ? product.sizes : getDefaultSizeVariants(initialGarmentType),
     colors: product?.colors || [],
     features: product?.features || [],
     careInstructions: product?.careInstructions || [
@@ -82,6 +95,7 @@ export default function ProductForm({ product = null }) {
           shortDescription: p.shortDescription || '',
           basePrice: p.basePrice || '',
           category: p.category?._id || p.category || '',
+          garmentType: p.garmentType || 'tshirt',
           productType: p.productType || 'half-sleeve',
           material: p.material || '',
           fabricType: p.fabricType || 'cotton',
@@ -89,6 +103,14 @@ export default function ProductForm({ product = null }) {
           fit: p.fit || 'regular',
           neckline: p.neckline || 'round',
           sleeveLength: p.sleeveLength || 'short',
+          trouserDetails: p.trouserDetails || {
+            rise: 'mid',
+            legStyle: 'straight',
+            waistType: 'fixed',
+            closure: 'button',
+            length: 'regular',
+            pockets: 2,
+          },
           pattern: p.pattern || 'solid',
           brand: p.brand || 'Naksh',
           madeIn: p.madeIn || 'India',
@@ -118,8 +140,6 @@ export default function ProductForm({ product = null }) {
 
 
 
-  useEffect(() => { fetchCategories(); }, []);
-
   const fetchCategories = async () => {
     try {
       const res = await fetch('/api/categories');
@@ -131,6 +151,16 @@ export default function ProductForm({ product = null }) {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
+  };
+
+  const handleGarmentTypeChange = (e) => {
+    const garmentType = e.target.value;
+    setFormData((current) => ({
+      ...current,
+      garmentType,
+      productType: PRODUCT_TYPES[garmentType][0].value,
+      sizes: getDefaultSizeVariants(garmentType),
+    }));
   };
 
   // Size management functions
@@ -145,7 +175,7 @@ export default function ProductForm({ product = null }) {
   };
 
   const addSize = () => {
-    const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+    const availableSizes = SIZE_OPTIONS[formData.garmentType] || SIZE_OPTIONS.tshirt;
     const usedSizes = formData.sizes.map(s => s.size);
     const nextSize = availableSizes.find(size => !usedSizes.includes(size));
 
@@ -199,6 +229,12 @@ export default function ProductForm({ product = null }) {
       ...formData,
       basePrice: Number(formData.basePrice),
       gsm: formData.gsm ? Number(formData.gsm) : undefined,
+      neckline: formData.garmentType === 'tshirt' ? formData.neckline : null,
+      sleeveLength: formData.garmentType === 'tshirt' ? formData.sleeveLength : null,
+      trouserDetails: formData.garmentType === 'trouser' ? {
+        ...formData.trouserDetails,
+        pockets: Number(formData.trouserDetails.pockets) || 0,
+      } : null,
       // Agar SKU khali hai to use null ya unique string dein
       productSku: formData.productSku.trim() || `SKU-${Date.now()}`,
       category: typeof formData.category === 'object' ? formData.category._id : formData.category,
@@ -349,7 +385,7 @@ export default function ProductForm({ product = null }) {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold">
-              {isEditing ? 'Edit Product' : 'New Product'}
+              {isEditing ? 'Edit Product' : `New ${formData.garmentType === 'trouser' ? 'Trouser' : 'T-Shirt'}`}
             </h1>
             <span className={`px-2 py-1 text-xs font-medium rounded-full ${formData.status === 'active' ? 'bg-green-100 text-green-700' :
               formData.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
@@ -419,7 +455,7 @@ export default function ProductForm({ product = null }) {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all"
-                    placeholder="e.g. Classic Cotton T-Shirt"
+                    placeholder={formData.garmentType === 'trouser' ? 'e.g. Classic Straight Chinos' : 'e.g. Classic Cotton T-Shirt'}
                   />
                 </div>
 
@@ -456,7 +492,24 @@ export default function ProductForm({ product = null }) {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Garment <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="garmentType"
+                      value={formData.garmentType}
+                      onChange={handleGarmentTypeChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all appearance-none bg-white"
+                    >
+                      {GARMENT_TYPES.map((garment) => (
+                        <option key={garment.value} value={garment.value}>{garment.label}</option>
+                      ))}
+                    </select>
+                    <p className="mt-1 text-xs text-amber-600">Changing this resets size variants.</p>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Category <span className="text-red-500">*</span>
@@ -476,7 +529,7 @@ export default function ProductForm({ product = null }) {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Product Type <span className="text-red-500">*</span>
+                      {formData.garmentType === 'trouser' ? 'Trouser Type' : 'T-Shirt Type'} <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="productType"
@@ -485,14 +538,9 @@ export default function ProductForm({ product = null }) {
                       required
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all appearance-none bg-white"
                     >
-                      <option value="">Select type</option>
-                      <option value="polo">Polo</option>
-                      <option value="half-sleeve">Half Sleeve</option>
-                      <option value="full-sleeve">Full Sleeve</option>
-                      <option value="v-neck">V-Neck</option>
-                      <option value="round-neck">Round Neck</option>
-                      <option value="henley">Henley</option>
-                      <option value="tank-top">Tank Top</option>
+                      {PRODUCT_TYPES[formData.garmentType].map((type) => (
+                        <option key={type.value} value={type.value}>{type.label}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -663,7 +711,9 @@ export default function ProductForm({ product = null }) {
             {/* Size-wise Pricing */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-medium">Size-wise Pricing</h2>
+                <h2 className="text-lg font-medium">
+                  {formData.garmentType === 'trouser' ? 'Waist-wise Pricing' : 'Size-wise Pricing'}
+                </h2>
                 <button
                   type="button"
                   onClick={addSize}
@@ -677,7 +727,9 @@ export default function ProductForm({ product = null }) {
                 {formData.sizes.map((sizeItem, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-medium">Size {sizeItem.size}</h3>
+                      <h3 className="font-medium">
+                        {formData.garmentType === 'trouser' ? 'Waist' : 'Size'} {sizeItem.size}
+                      </h3>
                       <button
                         type="button"
                         onClick={() => removeSize(index)}
@@ -889,8 +941,10 @@ export default function ProductForm({ product = null }) {
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-medium mb-6">Fit & Style</h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <h2 className="text-lg font-medium mb-6">
+                {formData.garmentType === 'trouser' ? 'Trouser Fit & Construction' : 'Fit & Style'}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Fit
@@ -908,39 +962,78 @@ export default function ProductForm({ product = null }) {
                     <option value="athletic">Athletic</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Neckline
-                  </label>
-                  <select
-                    name="neckline"
-                    value={formData.neckline}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all appearance-none bg-white"
-                  >
-                    <option value="round">Round</option>
-                    <option value="v-neck">V-Neck</option>
-                    <option value="polo">Polo</option>
-                    <option value="henley">Henley</option>
-                    <option value="crew">Crew</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sleeve Length
-                  </label>
-                  <select
-                    name="sleeveLength"
-                    value={formData.sleeveLength}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all appearance-none bg-white"
-                  >
-                    <option value="short">Short</option>
-                    <option value="long">Long</option>
-                    <option value="sleeveless">Sleeveless</option>
-                    <option value="3/4">3/4</option>
-                  </select>
-                </div>
+                {formData.garmentType === 'tshirt' ? (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Neckline</label>
+                      <select
+                        name="neckline"
+                        value={formData.neckline}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all appearance-none bg-white"
+                      >
+                        <option value="round">Round</option>
+                        <option value="v-neck">V-Neck</option>
+                        <option value="polo">Polo</option>
+                        <option value="henley">Henley</option>
+                        <option value="crew">Crew</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Sleeve Length</label>
+                      <select
+                        name="sleeveLength"
+                        value={formData.sleeveLength}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all appearance-none bg-white"
+                      >
+                        <option value="short">Short</option>
+                        <option value="long">Long</option>
+                        <option value="sleeveless">Sleeveless</option>
+                        <option value="3/4">3/4</option>
+                      </select>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {[
+                      { field: 'rise', label: 'Rise', options: TROUSER_OPTIONS.rise },
+                      { field: 'legStyle', label: 'Leg Style', options: TROUSER_OPTIONS.legStyle },
+                      { field: 'waistType', label: 'Waist Type', options: TROUSER_OPTIONS.waistType },
+                      { field: 'closure', label: 'Closure', options: TROUSER_OPTIONS.closure },
+                      { field: 'length', label: 'Length', options: TROUSER_OPTIONS.length },
+                    ].map(({ field, label, options }) => (
+                      <div key={field}>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                        <select
+                          value={formData.trouserDetails[field]}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            trouserDetails: { ...formData.trouserDetails, [field]: e.target.value },
+                          })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all appearance-none bg-white"
+                        >
+                          {options.map((option) => (
+                            <option key={option} value={option}>{option.replaceAll('-', ' ')}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ))}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Number of Pockets</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.trouserDetails.pockets}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          trouserDetails: { ...formData.trouserDetails, pockets: e.target.value },
+                        })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all"
+                      />
+                    </div>
+                  </>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Pattern

@@ -6,19 +6,34 @@ import Image from 'next/image';
 export default function AdminProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [garmentFilter, setGarmentFilter] = useState('all');
+  const [filtersReady, setFiltersReady] = useState(false);
+
+  useEffect(() => {
+    const requestedGarment = new URLSearchParams(window.location.search).get('garmentType');
+    if (requestedGarment === 'tshirt' || requestedGarment === 'trouser') {
+      setGarmentFilter(requestedGarment);
+    }
+    setFiltersReady(true);
+  }, []);
 
   const fetchProducts = async () => {
     setLoading(true);
     const token = localStorage.getItem('token');
-    const url = filter === 'all' ? '/api/admin/products?limit=100' : `/api/admin/products?status=${filter}&limit=100`;
+    const params = new URLSearchParams({ limit: '100' });
+    if (statusFilter !== 'all') params.set('status', statusFilter);
+    if (garmentFilter !== 'all') params.set('garmentType', garmentFilter);
+    const url = `/api/admin/products?${params}`;
     const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
     const data = await res.json();
     if (data.success) setProducts(data.data);
     setLoading(false);
   };
 
-  useEffect(() => { fetchProducts(); }, [filter]);
+  useEffect(() => {
+    if (filtersReady) fetchProducts();
+  }, [filtersReady, statusFilter, garmentFilter]);
   // Price calculation function
   const getProductPriceRange = (product) => {
     // First try basePrice
@@ -89,15 +104,29 @@ export default function AdminProductsPage() {
           <h1 className="text-5xl font-black uppercase tracking-tighter italic">Inventory</h1>
           <p className="text-[10px] uppercase tracking-[0.4em] text-gray-300 font-bold mt-2">Active Catalog Management</p>
         </div>
-        <Link href="/admin/products/add" className="bg-black text-white px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-center hover:bg-zinc-800 transition-all">+ Add Product</Link>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/admin/products/add?garmentType=tshirt" className="border border-black px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-center hover:bg-zinc-100 transition-all">+ Add T-Shirt</Link>
+          <Link href="/admin/products/add?garmentType=trouser" className="bg-black text-white px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-center hover:bg-zinc-800 transition-all">+ Add Trouser</Link>
+        </div>
       </div>
 
-      <div className="flex gap-8 overflow-x-auto pb-2 scrollbar-hide">
-        {['all', 'active', 'draft', 'archived'].map((s) => (
-          <button key={s} onClick={() => setFilter(s)} className={`text-[10px] uppercase font-black tracking-[0.2em] transition-all relative pb-2 ${filter === s ? 'text-black' : 'text-gray-300 hover:text-gray-500'}`}>
-            {s} {filter === s && <div className="absolute bottom-0 left-0 w-full h-[2px] bg-black"></div>}
-          </button>
-        ))}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div className="flex gap-8 overflow-x-auto pb-2 scrollbar-hide">
+          {['all', 'active', 'draft', 'archived'].map((s) => (
+            <button key={s} onClick={() => setStatusFilter(s)} className={`text-[10px] uppercase font-black tracking-[0.2em] transition-all relative pb-2 ${statusFilter === s ? 'text-black' : 'text-gray-300 hover:text-gray-500'}`}>
+              {s} {statusFilter === s && <div className="absolute bottom-0 left-0 w-full h-[2px] bg-black"></div>}
+            </button>
+          ))}
+        </div>
+        <select
+          value={garmentFilter}
+          onChange={(e) => setGarmentFilter(e.target.value)}
+          className="border border-black/10 bg-white px-4 py-3 text-[10px] uppercase font-black tracking-[0.2em] outline-none"
+        >
+          <option value="all">All Garments</option>
+          <option value="tshirt">T-Shirts</option>
+          <option value="trouser">Trousers</option>
+        </select>
       </div>
 
       <div className="bg-white border border-black/5 overflow-hidden">
@@ -136,7 +165,7 @@ export default function AdminProductsPage() {
                         <p className="text-sm font-black uppercase tracking-tight">{p.name}</p>
                         <p className="text-[9px] text-gray-400 uppercase tracking-widest">{p.category?.name || 'Uncategorized'}</p>
                         <p className="text-[8px] text-gray-300 uppercase tracking-widest mt-1">
-                          {p.productType || 'No type'} • {p.material || 'No material'}
+                          {(p.garmentType || 'tshirt') === 'trouser' ? 'Trouser' : 'T-Shirt'} • {p.productType || 'No type'} • {p.material || 'No material'}
                         </p>
                       </div>
                     </div>
@@ -201,6 +230,9 @@ export default function AdminProductsPage() {
               <div className="flex-1">
                 <p className="text-sm font-black uppercase tracking-tight">{p.name}</p>
                 <p className="text-[9px] text-gray-400 uppercase tracking-widest">{p.category?.name || 'Uncategorized'}</p>
+                <p className="text-[8px] text-gray-300 uppercase tracking-widest mt-1">
+                  {(p.garmentType || 'tshirt') === 'trouser' ? 'Trouser' : 'T-Shirt'} • {p.productType || 'No type'}
+                </p>
               </div>
             </div>
             <div className="flex justify-between items-center">

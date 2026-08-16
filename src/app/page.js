@@ -280,7 +280,7 @@ export default async function HomePage() {
                         {product.name}
                       </h4>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-black text-text">Rs {product.price}</span>
+                        {/* <span className="text-sm font-black text-text">Rs {product.price}</span> */}
                         {product.comparePrice && (
                           <span className="text-xs text-text opacity-40 line-through">Rs {product.comparePrice}</span>
                         )}

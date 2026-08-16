@@ -1,9 +1,11 @@
 'use client';
 
+import { GARMENT_TYPES, PRODUCT_TYPES } from '@/lib/product-config';
+
 export default function FilterSidebar({ categories, filters, onFilterChange }) {
-  const productTypes = [
-    'polo', 'half-sleeve', 'full-sleeve', 'v-neck', 'round-neck', 'henley', 'tank-top',
-  ];
+  const productTypes = filters.garmentType
+    ? PRODUCT_TYPES[filters.garmentType]
+    : Object.values(PRODUCT_TYPES).flat();
 
   const fits = ['slim', 'regular', 'loose', 'oversized', 'athletic'];
   const patterns = ['solid', 'striped', 'printed', 'checkered', 'graphic', 'plain'];
@@ -33,6 +35,21 @@ export default function FilterSidebar({ categories, filters, onFilterChange }) {
 
       {/* Category */}
       <div>
+        <label className={labelStyles}>Garment</label>
+        <select
+          value={filters.garmentType}
+          onChange={(e) => onFilterChange({ garmentType: e.target.value, type: '' })}
+          className={`${inputStyles} cursor-pointer appearance-none`}
+        >
+          <option value="">All Garments</option>
+          {GARMENT_TYPES.map((garment) => (
+            <option key={garment.value} value={garment.value}>{garment.label.toUpperCase()}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Category */}
+      <div>
         <label className={labelStyles}>Category</label>
         <select
           value={filters.category}
@@ -58,8 +75,8 @@ export default function FilterSidebar({ categories, filters, onFilterChange }) {
         >
           <option value="">All Styles</option>
           {productTypes.map((type) => (
-            <option key={type} value={type}>
-              {type.replace('-', ' ').toUpperCase()}
+            <option key={type.value} value={type.value}>
+              {type.label.toUpperCase()}
             </option>
           ))}
         </select>
@@ -192,6 +209,7 @@ export default function FilterSidebar({ categories, filters, onFilterChange }) {
       <button
         onClick={() =>
           onFilterChange({
+            garmentType: '',
             category: '',
             type: '',
             fit: '',

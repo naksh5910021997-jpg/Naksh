@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
 export default function Navbar() {
@@ -10,6 +10,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState(null);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     // Auth Check
@@ -47,9 +48,18 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: 'Home' },
-    { href: '/products', label: 'Products' },
+    { href: '/products?garmentType=tshirt', label: 'T-Shirts' },
+    { href: '/products?garmentType=trouser', label: 'Trousers' },
     { href: '/categories', label: 'Categories' },
   ];
+
+  const isNavLinkActive = (href) => {
+    const [path, queryString] = href.split('?');
+    if (pathname !== path) return false;
+    if (!queryString) return true;
+    const expected = new URLSearchParams(queryString);
+    return [...expected].every(([key, value]) => searchParams.get(key) === value);
+  };
 
   return (
     <nav
@@ -72,11 +82,11 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={`text-[11px] uppercase tracking-[0.2em] font-bold transition-all relative group ${
-                  pathname === link.href ? 'text-text' : 'text-text opacity-60 hover:opacity-100'
+                  isNavLinkActive(link.href) ? 'text-text' : 'text-text opacity-60 hover:opacity-100'
                 }`}
               >
                 {link.label}
-                <span className={`absolute -bottom-1 left-0 h-[1.5px] bg-text transition-all duration-300 ${pathname === link.href ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+                <span className={`absolute -bottom-1 left-0 h-[1.5px] bg-text transition-all duration-300 ${isNavLinkActive(link.href) ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
               </Link>
             ))}
           </div>

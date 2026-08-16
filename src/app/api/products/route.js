@@ -18,6 +18,14 @@ export async function GET(request) {
     // Build filter object
     const filter = { status: 'active' };
 
+    // Garment filter. Legacy records without garmentType are T-shirts.
+    const garmentType = searchParams.get('garmentType');
+    if (garmentType === 'tshirt') {
+      filter.$and = [{ $or: [{ garmentType: 'tshirt' }, { garmentType: { $exists: false } }] }];
+    } else if (garmentType === 'trouser') {
+      filter.garmentType = 'trouser';
+    }
+
     // Category filter
     if (searchParams.get('category')) {
       filter.category = searchParams.get('category');
@@ -45,13 +53,14 @@ export async function GET(request) {
 
     // Price range filter
     if (searchParams.get('minPrice') || searchParams.get('maxPrice')) {
-      filter.price = {};
+      const priceFilter = {};
       if (searchParams.get('minPrice')) {
-        filter.price.$gte = parseFloat(searchParams.get('minPrice'));
+        priceFilter.$gte = parseFloat(searchParams.get('minPrice'));
       }
       if (searchParams.get('maxPrice')) {
-        filter.price.$lte = parseFloat(searchParams.get('maxPrice'));
+        priceFilter.$lte = parseFloat(searchParams.get('maxPrice'));
       }
+      filter.basePrice = priceFilter;
     }
 
     // Special filters
@@ -64,7 +73,7 @@ export async function GET(request) {
     }
 
     if (searchParams.get('onSale') === 'true') {
-      filter.onSale = true;
+      filter['sizes.onSale'] = true;
     }
 
     // Rating filter
@@ -86,13 +95,13 @@ export async function GET(request) {
     // Build sort object
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
-    let sort = { [sortBy]: sortOrder };
+    let sort = { [sortBy === 'price' ? 'basePrice' : sortBy]: sortOrder };
 
     // Special sort cases
     if (sortBy === 'popularity') {
       sort = { rating: -1, numReviews: -1, createdAt: -1 };
     } else if (sortBy === 'discount') {
-      sort = { onSale: -1, createdAt: -1 };
+      sort = { 'sizes.onSale': -1, createdAt: -1 };
     }
 
     // Execute queries

@@ -3,7 +3,14 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ totalProducts: 0, activeProducts: 0, draftProducts: 0, totalCategories: 0 });
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    tshirtProducts: 0,
+    trouserProducts: 0,
+    activeProducts: 0,
+    draftProducts: 0,
+    totalCategories: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,6 +27,8 @@ export default function AdminDashboard() {
         if (pData.success) {
           setStats({
             totalProducts: pData.data.length,
+            tshirtProducts: pData.data.filter(p => !p.garmentType || p.garmentType === 'tshirt').length,
+            trouserProducts: pData.data.filter(p => p.garmentType === 'trouser').length,
             activeProducts: pData.data.filter(p => p.status === 'active').length,
             draftProducts: pData.data.filter(p => p.status === 'draft').length,
             totalCategories: cData.success ? cData.data.length : 0,
@@ -39,9 +48,11 @@ export default function AdminDashboard() {
         <p className="text-[10px] uppercase tracking-[0.4em] text-gray-400 font-bold">Metrics & System Integrity</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-px bg-black/5 border border-black/5">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-px bg-black/5 border border-black/5">
         {[
           { label: 'Total units', val: stats.totalProducts, link: '/admin/products' },
+          { label: 'T-Shirts', val: stats.tshirtProducts, link: '/admin/products?garmentType=tshirt' },
+          { label: 'Trousers', val: stats.trouserProducts, link: '/admin/products?garmentType=trouser' },
           { label: 'Market Live', val: stats.activeProducts, link: '/admin/products' },
           { label: 'Drafts', val: stats.draftProducts, link: '/admin/products' },
           { label: 'Collections', val: stats.totalCategories, link: '/admin/categories' }
@@ -57,8 +68,12 @@ export default function AdminDashboard() {
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-[10px] uppercase tracking-[0.5em] font-black border-b border-black pb-4">Quick Commands</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link href="/admin/products/add" className="p-8 border border-black flex justify-between items-center group hover:bg-black hover:text-white transition-all duration-500">
-              <span className="text-xs font-black uppercase tracking-[0.2em]">Add New Item</span>
+            <Link href="/admin/products/add?garmentType=tshirt" className="p-8 border border-black flex justify-between items-center group hover:bg-black hover:text-white transition-all duration-500">
+              <span className="text-xs font-black uppercase tracking-[0.2em]">Add T-Shirt</span>
+              <span className="text-xl group-hover:translate-x-2 transition-transform">→</span>
+            </Link>
+            <Link href="/admin/products/add?garmentType=trouser" className="p-8 border border-black flex justify-between items-center group hover:bg-black hover:text-white transition-all duration-500">
+              <span className="text-xs font-black uppercase tracking-[0.2em]">Add Trouser</span>
               <span className="text-xl group-hover:translate-x-2 transition-transform">→</span>
             </Link>
             <Link href="/admin/products" className="p-8 border border-black/10 flex justify-between items-center group hover:border-black transition-all">

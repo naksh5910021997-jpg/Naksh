@@ -3,6 +3,30 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { authMiddleware } from '@/middleware/auth';
 import { deleteMultipleImages, uploadImage } from '@/lib/cloudinary';
+import { PRODUCT_TYPES, SIZE_OPTIONS } from '@/lib/product-config';
+
+function normalizeProductData(data) {
+  const garmentType = data.garmentType || 'tshirt';
+  const allowedTypes = PRODUCT_TYPES[garmentType];
+
+  if (!allowedTypes) {
+    throw new Error('Please select a valid garment type');
+  }
+
+  if (!allowedTypes.some(({ value }) => value === data.productType)) {
+    throw new Error(`Please select a valid ${garmentType === 'trouser' ? 'trouser' : 'T-shirt'} type`);
+  }
+
+  const allowedSizes = SIZE_OPTIONS[garmentType];
+  if (data.sizes?.some(({ size }) => !allowedSizes.includes(String(size)))) {
+    throw new Error(`One or more sizes are invalid for ${garmentType === 'trouser' ? 'trousers' : 'T-shirts'}`);
+  }
+
+  data.garmentType = garmentType;
+  data.basePrice = Number(data.basePrice);
+  data.totalStock = (data.sizes || []).reduce((total, size) => total + (Number(size.stock) || 0), 0);
+  return data;
+}
 
 // GET - Get all products (Admin)
 async function getProducts(request) {
@@ -14,9 +38,15 @@ async function getProducts(request) {
     const limit = parseInt(searchParams.get('limit')) || 20;
     const skip = (page - 1) * limit;
     const status = searchParams.get('status');
+    const garmentType = searchParams.get('garmentType');
 
     let query = {};
     if (status) query.status = status;
+    if (garmentType === 'tshirt') {
+      query.$or = [{ garmentType: 'tshirt' }, { garmentType: { $exists: false } }];
+    } else if (garmentType === 'trouser') {
+      query.garmentType = 'trouser';
+    }
 
     const products = await Product.find(query)
       .populate('category', 'name slug')
@@ -50,12 +80,9 @@ async function getProducts(request) {
 async function createProduct(request) {
   try {
     await connectDB();
-    const data = await request.json();
+    const data = normalizeProductData(await request.json());
 
     // 1. Data Cleaning: Ensure numbers are actually numbers
-    if (data.price) data.price = Number(data.price);
-    if (data.comparePrice) data.comparePrice = Number(data.comparePrice);
-
     // 2. Slug Generation
     const slug = data.name
       .toLowerCase()
@@ -92,7 +119,7 @@ async function updateProduct(request) {
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    const data = await request.json();
+    const data = normalizeProductData(await request.json());
 
     if (!id) {
       return NextResponse.json(

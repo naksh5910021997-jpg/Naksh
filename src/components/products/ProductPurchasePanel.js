@@ -1,27 +1,39 @@
-// components/products/WhatsAppOrderButton.js
 'use client';
 
 import { useState } from 'react';
+import { getEffectiveSizePrice, getEffectiveSizeComparePrice } from '@/lib/pricing';
 
-export default function WhatsAppOrderButton({ product }) {
-  const [selectedSize, setSelectedSize] = useState('');
+export default function ProductPurchasePanel({ product }) {
+  const sizes = product.sizes || [];
+
+  // Default to the first in-stock size, falling back to the first size overall
+  const defaultSize = sizes.find(s => s.stock > 0) || sizes[0] || null;
+  const [selectedSize, setSelectedSize] = useState(defaultSize?.size || '');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
 
-  // Helper functions
-  const getProductPrice = (product) => {
-    if (product.basePrice) return product.basePrice;
-    if (product.sizes && product.sizes.length > 0) {
-      const prices = product.sizes.filter(size => size.price > 0).map(size => size.price);
-      if (prices.length > 0) return Math.min(...prices);
-    }
-    return product.price || 0;
-  };
+  const activeSize = sizes.length > 0
+    ? sizes.find(s => s.size === selectedSize) || defaultSize
+    : null;
 
-  const getSelectedSizePrice = () => {
-    if (!selectedSize || !product.sizes) return getProductPrice(product);
-    const size = product.sizes.find(s => s.size === selectedSize);
-    return size ? size.price : getProductPrice(product);
+  const currentPrice = activeSize
+    ? getEffectiveSizePrice(activeSize)
+    : (product.basePrice || product.price || 0);
+
+  const comparePrice = activeSize
+    ? getEffectiveSizeComparePrice(activeSize)
+    : (product.comparePrice || null);
+
+  const onSale = activeSize ? !!(activeSize.onSale && activeSize.salePrice > 0) : !!product.onSale;
+
+  const discountPercentage = comparePrice && currentPrice
+    ? Math.round(((comparePrice - currentPrice) / comparePrice) * 100)
+    : 0;
+
+  const isOutOfStock = () => {
+    if (activeSize) return activeSize.stock <= 0;
+    if (sizes.length > 0) return sizes.every(s => s.stock <= 0);
+    return (product.stock || 0) <= 0;
   };
 
   const generateWhatsAppMessage = () => {
@@ -30,22 +42,20 @@ export default function WhatsAppOrderButton({ product }) {
 
     let message = `🛍️ *Order Inquiry - Naksh Studio*\n\n`;
     message += `*Product:* ${product.name}\n`;
-    message += `*SKU:* ${product.sku || 'N/A'}\n`;
+    message += `*SKU:* ${product.productSku || product.sku || 'N/A'}\n`;
     message += `*Category:* ${product.category?.name || 'N/A'}\n`;
 
-    if (selectedSize) {
-      message += `*Size:* ${selectedSize}\n`;
-      message += `*Price:* Rs ${getSelectedSizePrice()}\n`;
-    } else {
-      message += `*Price:* Rs ${getProductPrice(product)}\n`;
+    if (activeSize) {
+      message += `*Size:* ${activeSize.size}\n`;
     }
+    message += `*Price:* Rs ${currentPrice}\n`;
 
     if (selectedColor) {
       message += `*Color:* ${selectedColor}\n`;
     }
 
     message += `*Quantity:* ${quantity}\n`;
-    message += `*Total:* Rs ${getSelectedSizePrice() * quantity}\n\n`;
+    message += `*Total:* Rs ${currentPrice * quantity}\n\n`;
 
     if (product.material) {
       message += `*Material:* ${product.material}\n`;
@@ -58,63 +68,94 @@ export default function WhatsAppOrderButton({ product }) {
   };
 
   const handleWhatsAppOrder = () => {
-    // Your WhatsApp number (with country code, without +)
-    const whatsappNumber = '03181058796'; // Replace with your actual number
+    const whatsappNumber = '03181058796';
     const message = generateWhatsAppMessage();
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-
     window.open(whatsappUrl, '_blank');
   };
 
-  const isOutOfStock = () => {
-    if (selectedSize && product.sizes) {
-      const size = product.sizes.find(s => s.size === selectedSize);
-      return size ? size.stock <= 0 : false;
-    }
-
-    if (product.sizes && product.sizes.length > 0) {
-      return product.sizes.every(size => size.stock <= 0);
-    }
-
-    return (product.stock || 0) <= 0;
-  };
+  const needsSizeSelection = sizes.length > 0 && !activeSize;
 
   return (
-    <div className="space-y-6 border-t border-accent-dim pt-8">
+    <div className="space-y-8">
+      {/* Price Section */}
+      <div className="space-y-3">
+        <div className="flex items-baseline gap-4">
+          <span className="text-4xl font-black text-text tracking-tighter">
+            Rs {currentPrice}
+          </span>
+          {comparePrice && (
+            <span className="text-xl text-text opacity-40 line-through font-medium">
+              Rs {comparePrice}
+            </span>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          {discountPercentage > 0 && (
+            <span className="text-[10px] font-black bg-red-50 text-red-500 px-2 py-1 uppercase rounded-sm">
+              -{discountPercentage}% OFF
+            </span>
+          )}
+          {onSale && (
+            <span className="text-[10px] font-black bg-green-50 text-green-600 px-2 py-1 uppercase rounded-sm">
+              ON SALE
+            </span>
+          )}
+          {product.trending && (
+            <span className="text-[10px] font-black bg-red-50 text-red-500 px-2 py-1 uppercase rounded-sm">
+              🔥 TRENDING
+            </span>
+          )}
+        </div>
+
+        {sizes.length > 0 && (
+          <p className="text-[10px] text-text opacity-60 uppercase tracking-widest">
+            {sizes.length} size{sizes.length > 1 ? 's' : ''} available
+          </p>
+        )}
+      </div>
+
       {/* Size Selection */}
-      {product.sizes && product.sizes.length > 0 && (
+      {sizes.length > 0 && (
         <div>
           <h3 className="text-[10px] uppercase tracking-widest font-black mb-3 text-text opacity-60">
-            Select Size *
+            {product.garmentType === 'trouser' ? 'Select Waist Size *' : 'Select Size *'}
           </h3>
           <div className="grid grid-cols-3 gap-2">
-            {product.sizes.map((size) => (
-              <button
-                key={size.size}
-                onClick={() => setSelectedSize(size.size)}
-                disabled={size.stock <= 0}
-                className={`
-                  border rounded-md p-3 text-center transition-all text-sm font-black uppercase tracking-tight
-                  ${selectedSize === size.size
-                    ? 'border-text bg-text text-card-bg'
-                    : 'border-accent-dim hover:border-text'
-                  }
-                  ${size.stock <= 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                `}
-              >
-                <div>{size.size}</div>
-                <div className="text-[10px] opacity-60 mt-1">Rs {size.price}</div>
-                {size.stock <= 0 && (
-                  <div className="text-[8px] text-red-500 font-bold mt-1">Out</div>
-                )}
-              </button>
-            ))}
+            {sizes.map((size) => {
+              const sizeOnSale = size.onSale && size.salePrice > 0;
+              return (
+                <button
+                  key={size.size}
+                  type="button"
+                  onClick={() => setSelectedSize(size.size)}
+                  disabled={size.stock <= 0}
+                  className={`
+                    border rounded-md p-3 text-center transition-all text-sm font-black uppercase tracking-tight
+                    ${selectedSize === size.size
+                      ? 'border-text bg-text text-card-bg'
+                      : 'border-accent-dim hover:border-text'
+                    }
+                    ${size.stock <= 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                  `}
+                >
+                  <div>{size.size}</div>
+                  <div className="text-[10px] opacity-60 mt-1">
+                    Rs {sizeOnSale ? size.salePrice : size.price}
+                  </div>
+                  {sizeOnSale && (
+                    <div className="text-[8px] opacity-50 line-through">
+                      Rs {size.comparePrice > 0 ? size.comparePrice : size.price}
+                    </div>
+                  )}
+                  {size.stock <= 0 && (
+                    <div className="text-[8px] text-red-500 font-bold mt-1">Out</div>
+                  )}
+                </button>
+              );
+            })}
           </div>
-          {selectedSize && (
-            <p className="text-[10px] text-text opacity-60 mt-2">
-              Selected: {selectedSize} - Rs {getSelectedSizePrice()}
-            </p>
-          )}
         </div>
       )}
 
@@ -128,6 +169,7 @@ export default function WhatsAppOrderButton({ product }) {
             {product.colors.map((color) => (
               <button
                 key={color.name}
+                type="button"
                 onClick={() => setSelectedColor(color.name)}
                 className={`
                   w-10 h-10 rounded-full border-2 transition-all
@@ -156,6 +198,7 @@ export default function WhatsAppOrderButton({ product }) {
         </h3>
         <div className="flex items-center gap-4">
           <button
+            type="button"
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
             className="w-10 h-10 border border-accent-dim rounded-md flex items-center justify-center hover:border-text transition-colors text-text font-black"
           >
@@ -165,6 +208,7 @@ export default function WhatsAppOrderButton({ product }) {
             {quantity}
           </span>
           <button
+            type="button"
             onClick={() => setQuantity(quantity + 1)}
             className="w-10 h-10 border border-accent-dim rounded-md flex items-center justify-center hover:border-text transition-colors text-text font-black"
           >
@@ -180,18 +224,19 @@ export default function WhatsAppOrderButton({ product }) {
             Total Amount
           </span>
           <span className="text-2xl font-black text-text">
-            Rs {getSelectedSizePrice() * quantity}
+            Rs {currentPrice * quantity}
           </span>
         </div>
       </div>
 
       {/* WhatsApp Order Button */}
       <button
+        type="button"
         onClick={handleWhatsAppOrder}
-        disabled={isOutOfStock() || (product.sizes && product.sizes.length > 0 && !selectedSize)}
+        disabled={isOutOfStock() || needsSizeSelection}
         className={`
           w-full py-4 px-6 text-[11px] uppercase font-black tracking-[0.3em] rounded-md transition-all flex items-center justify-center gap-3
-          ${isOutOfStock() || (product.sizes && product.sizes.length > 0 && !selectedSize)
+          ${isOutOfStock() || needsSizeSelection
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
             : 'bg-green-500 hover:bg-green-600 text-white'
           }
@@ -202,7 +247,7 @@ export default function WhatsAppOrderButton({ product }) {
         </svg>
         {isOutOfStock()
           ? 'Out of Stock'
-          : (product.sizes && product.sizes.length > 0 && !selectedSize)
+          : needsSizeSelection
             ? 'Select Size First'
             : 'Order via WhatsApp'
         }

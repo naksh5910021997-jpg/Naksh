@@ -2,93 +2,19 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-
-// Helper functions for price calculation
-function getProductPrice(product) {
-  // First try basePrice
-  if (product.basePrice) {
-    return product.basePrice;
-  }
-
-  // Then try sizes pricing
-  if (product.sizes && product.sizes.length > 0) {
-    const prices = product.sizes
-      .filter(size => size.price > 0)
-      .map(size => size.price);
-
-    if (prices.length > 0) {
-      return Math.min(...prices); // Return minimum price
-    }
-  }
-
-  // Fallback to old price field (if exists)
-  if (product.price) {
-    return product.price;
-  }
-
-  return 0;
-}
-
-function getComparePrice(product) {
-  // Check if any size has comparePrice
-  if (product.sizes && product.sizes.length > 0) {
-    const comparePrices = product.sizes
-      .filter(size => size.comparePrice > 0)
-      .map(size => size.comparePrice);
-
-    if (comparePrices.length > 0) {
-      return Math.min(...comparePrices);
-    }
-  }
-
-  // Fallback to old comparePrice field
-  return product.comparePrice || null;
-}
-
-function isProductOnSale(product) {
-  // Check if any size is on sale
-  if (product.sizes && product.sizes.length > 0) {
-    return product.sizes.some(size => size.onSale);
-  }
-
-  // Fallback to old onSale field
-  return product.onSale || false;
-}
-
-function getPriceRange(product) {
-  // If basePrice exists, show that
-  if (product.basePrice) {
-    return `Rs ${product.basePrice}`;
-  }
-
-  // Calculate price range from sizes
-  if (product.sizes && product.sizes.length > 0) {
-    const prices = product.sizes
-      .filter(size => size.price > 0)
-      .map(size => size.price);
-
-    if (prices.length === 0) return 'Price not set';
-
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-
-    return minPrice === maxPrice
-      ? `Rs ${minPrice}`
-      : `Rs ${minPrice} - Rs ${maxPrice}`;
-  }
-
-  // Fallback
-  return product.price ? `Rs ${product.price}` : 'Price not set';
-}
+import {
+  getProductPrice,
+  getComparePrice,
+  isProductOnSale,
+  getPriceRange,
+  getDiscountPercentage,
+} from '@/lib/pricing';
 
 export default function ProductCard({ product }) {
   const currentPrice = getProductPrice(product);
   const comparePrice = getComparePrice(product);
   const onSale = isProductOnSale(product);
-
-  const discountPercentage = comparePrice && currentPrice
-    ? Math.round(((comparePrice - currentPrice) / comparePrice) * 100)
-    : 0;
+  const discountPercentage = getDiscountPercentage(currentPrice, comparePrice);
 
   return (
     <Link href={`/products/${product.slug || product._id}`} className="group block bg-card-bg font-sans">
@@ -127,9 +53,9 @@ export default function ProductCard({ product }) {
                 Sale
               </span>
             )}
-            {discountPercentage  && (
-              <span className="bg-card-bg text-text border border-text text-[20px] uppercase font-bold px-2 py-1 tracking-tighter rounded-sm">
-                {discountPercentage}%
+            {discountPercentage > 0 && (
+              <span className="bg-card-bg text-text border border-text text-[10px] uppercase font-bold px-2 py-1 tracking-tighter rounded-sm">
+                -{discountPercentage}%
               </span>
             )}
           </div>

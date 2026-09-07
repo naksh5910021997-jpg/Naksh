@@ -2,49 +2,11 @@ import Link from 'next/link';
 import Navbar from '@/components/ui/Navbar';
 import Footer from '@/components/ui/Footer';
 import ProductGallery from '@/components/products/ProductGallery';
-import WhatsAppOrderButton from '../WhatsAppOrderButton';
+import ProductPurchasePanel from '@/components/products/ProductPurchasePanel';
 import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 
 export const dynamic = 'force-dynamic';
-
-// Helper functions for price calculation (same as before)
-function getProductPrice(product) {
-  if (product.basePrice) return product.basePrice;
-  if (product.sizes && product.sizes.length > 0) {
-    const prices = product.sizes.filter(size => size.price > 0).map(size => size.price);
-    if (prices.length > 0) return Math.min(...prices);
-  }
-  if (product.price) return product.price;
-  return 0;
-}
-
-function getComparePrice(product) {
-  if (product.sizes && product.sizes.length > 0) {
-    const comparePrices = product.sizes.filter(size => size.comparePrice > 0).map(size => size.comparePrice);
-    if (comparePrices.length > 0) return Math.min(...comparePrices);
-  }
-  return product.comparePrice || null;
-}
-
-function getPriceRange(product) {
-  if (product.basePrice) return `Rs ${product.basePrice}`;
-  if (product.sizes && product.sizes.length > 0) {
-    const prices = product.sizes.filter(size => size.price > 0).map(size => size.price);
-    if (prices.length === 0) return 'Price not set';
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    return minPrice === maxPrice ? `Rs ${minPrice}` : `Rs ${minPrice} - Rs ${maxPrice}`;
-  }
-  return product.price ? `Rs ${product.price}` : 'Price not set';
-}
-
-function isProductOnSale(product) {
-  if (product.sizes && product.sizes.length > 0) {
-    return product.sizes.some(size => size.onSale);
-  }
-  return product.onSale || false;
-}
 
 async function getProduct(id) {
   try {
@@ -85,15 +47,7 @@ export default async function ProductDetailPage({ params }) {
        </div>
     );
   }
-
-  const currentPrice = getProductPrice(product);
-  const comparePrice = getComparePrice(product);
-  const onSale = isProductOnSale(product);
-
-  const discountPercentage = comparePrice && currentPrice
-    ? Math.round(((comparePrice - currentPrice) / comparePrice) * 100)
-    : 0;
-
+// console.log('Product data:', product); // Debugging line to check the product data
   return (
     <div className="bg-main-bg min-h-screen font-sans">
       <Navbar />
@@ -136,106 +90,10 @@ export default async function ProductDetailPage({ params }) {
                 </div>
               )}
 
-              {/* Price Section */}
-              <div className="space-y-3">
-                {product.sizes && product.sizes.length > 1 ? (
-                  <div className="flex items-baseline gap-4">
-                    <span className="text-4xl font-black text-text tracking-tighter">
-                      {getPriceRange(product)}
-                    </span>
-                    {comparePrice && (
-                      <span className="text-xl text-text opacity-40 line-through font-medium">
-                        Rs {comparePrice}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex items-baseline gap-4">
-                    <span className="text-4xl font-black text-text tracking-tighter">
-                      Rs {currentPrice}
-                    </span>
-                    {comparePrice && (
-                      <span className="text-xl text-text opacity-40 line-through font-medium">
-                        Rs {comparePrice}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* Badges */}
-                <div className="flex gap-2">
-                  {discountPercentage > 0 && (
-                    <span className="text-[10px] font-black bg-red-50 text-red-500 px-2 py-1 uppercase rounded-sm">
-                      -{discountPercentage}% OFF
-                    </span>
-                  )}
-                  {onSale && (
-                    <span className="text-[10px] font-black bg-green-50 text-green-600 px-2 py-1 uppercase rounded-sm">
-                      ON SALE
-                    </span>
-                  )}
-                  {product.trending && (
-                    <span className="text-[10px] font-black bg-red-50 text-red-500 px-2 py-1 uppercase rounded-sm">
-                      🔥 TRENDING
-                    </span>
-                  )}
-                </div>
-
-                {product.sizes && product.sizes.length > 0 && (
-                  <p className="text-[10px] text-text opacity-60 uppercase tracking-widest">
-                    {product.sizes.length} size{product.sizes.length > 1 ? 's' : ''} available
-                  </p>
-                )}
-              </div>
             </section>
 
-            {/* Sizes Section (if available) */}
-            {product.sizes && product.sizes.length > 0 && (
-              <div>
-                <h3 className="text-[10px] uppercase tracking-widest font-black mb-4 text-text opacity-60">
-                  {product.garmentType === 'trouser' ? 'Available Waist Sizes' : 'Available Sizes'}
-                </h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {product.sizes.map((size, i) => (
-                    <div key={i} className="border border-accent-dim rounded-md p-3 text-center hover:border-text transition-colors">
-                      <div className="text-sm font-black text-text uppercase tracking-tight">
-                        {size.size}
-                      </div>
-                      <div className="text-[10px] text-text opacity-60 mt-1">
-                        Rs {size.price}
-                      </div>
-                      {size.stock <= 0 && (
-                        <div className="text-[8px] text-red-500 font-bold uppercase tracking-widest mt-1">
-                          Out of Stock
-                        </div>
-                      )}
-                      {size.stock > 0 && size.stock <= (product.lowStockThreshold || 5) && (
-                        <div className="text-[8px] text-yellow-600 font-bold uppercase tracking-widest mt-1">
-                          Low Stock ({size.stock})
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Colors Section */}
-            {product.colors?.length > 0 && (
-              <div>
-                <h3 className="text-[10px] uppercase tracking-widest font-black mb-4 text-text opacity-60">Available Palette</h3>
-                <div className="flex gap-4">
-                  {product.colors.map((color, i) => (
-                    <div key={i} className="flex flex-col items-center gap-2">
-                      <div className="w-8 h-8 rounded-full border border-accent-dim p-0.5 hover:scale-110 transition-all cursor-pointer">
-                        <div className="w-full h-full rounded-full" style={{ backgroundColor: color.hexCode }} />
-                      </div>
-                      <span className="text-[8px] font-bold text-text opacity-60 uppercase tracking-tighter">{color.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Price, Size/Color Selection, Quantity & Order */}
+            <ProductPurchasePanel product={product} />
 
             {/* Features */}
             {product.features?.length > 0 && (
@@ -250,9 +108,6 @@ export default async function ProductDetailPage({ params }) {
                 </ul>
               </div>
             )}
-
-            {/* WhatsApp Order Button - Replace AddToCartButton */}
-            <WhatsAppOrderButton product={product} />
 
             {/* Material & Care Card */}
             <div className="bg-card-bg border border-accent-dim rounded-md p-6 space-y-4">

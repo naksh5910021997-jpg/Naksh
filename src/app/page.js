@@ -6,6 +6,7 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import Category from '@/models/Category';
 import Image from 'next/image';
+import { getProductPrice, getComparePrice, isProductOnSale } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
 
@@ -81,7 +82,7 @@ async function getTrendingProducts() {
   if (trending.length < 6) {
     const onSale = await Product.find({
       status: 'active',
-      onSale: true,
+      'sizes.onSale': true,
       _id: { $nin: trending.map(p => p._id) }
     })
     .sort({ createdAt: -1 })
@@ -213,9 +214,9 @@ export default async function HomePage() {
                         {trendingProducts[0].name}
                       </h3>
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl font-black text-white">Rs {trendingProducts[0].price}</span>
-                        {trendingProducts[0].comparePrice && (
-                          <span className="text-lg text-white/60 line-through">Rs {trendingProducts[0].comparePrice}</span>
+                        <span className="text-2xl font-black text-white">Rs {getProductPrice(trendingProducts[0])}</span>
+                        {getComparePrice(trendingProducts[0]) && (
+                          <span className="text-lg text-white/60 line-through">Rs {getComparePrice(trendingProducts[0])}</span>
                         )}
                       </div>
 
@@ -239,7 +240,11 @@ export default async function HomePage() {
 
               {/* Small Grid */}
               <div className="lg:col-span-6 grid grid-cols-2 gap-4">
-                {trendingProducts.slice(1, 5).map((product, index) => (
+                {trendingProducts.slice(1, 5).map((product, index) => {
+                  const price = getProductPrice(product);
+                  const compare = getComparePrice(product);
+                  const onSale = isProductOnSale(product);
+                  return (
                   <Link key={product._id} href={`/products/${product.slug || product._id}`} className="group block">
                     <div className="relative overflow-hidden bg-main-bg border border-accent-dim rounded-md group-hover:border-text transition-all duration-500 aspect-square">
                       {product.images && product.images.length > 0 ? (
@@ -267,7 +272,7 @@ export default async function HomePage() {
                             Trending
                           </span>
                         )}
-                        {product.onSale && (
+                        {onSale && (
                           <span className="bg-green-500 text-white text-[8px] uppercase font-bold px-2 py-1 tracking-tighter rounded-sm">
                             Sale
                           </span>
@@ -280,14 +285,15 @@ export default async function HomePage() {
                         {product.name}
                       </h4>
                       <div className="flex items-center gap-2">
-                        {/* <span className="text-sm font-black text-text">Rs {product.price}</span> */}
-                        {product.comparePrice && (
-                          <span className="text-xs text-text opacity-40 line-through">Rs {product.comparePrice}</span>
+                        <span className="text-sm font-black text-text">Rs {price}</span>
+                        {compare && (
+                          <span className="text-xs text-text opacity-40 line-through">Rs {compare}</span>
                         )}
                       </div>
                     </div>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getEffectiveSizePrice, getEffectiveSizeComparePrice } from '@/lib/pricing';
+import { pushToDataLayer } from '@/lib/gtm';
 
 export default function ProductPurchasePanel({ product }) {
   const sizes = product.sizes || [];
@@ -71,10 +72,44 @@ export default function ProductPurchasePanel({ product }) {
     const whatsappNumber = '03181058796';
     const message = generateWhatsAppMessage();
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+
+    pushToDataLayer({
+      event: 'generate_lead',
+      ecommerce: {
+        currency: 'PKR',
+        value: currentPrice * quantity,
+        items: [{
+          item_id: product._id,
+          item_name: product.name,
+          item_category: product.category?.name,
+          item_variant: activeSize?.size,
+          price: currentPrice,
+          quantity,
+        }],
+      },
+    });
+
     window.open(whatsappUrl, '_blank');
   };
 
   const needsSizeSelection = sizes.length > 0 && !activeSize;
+
+  useEffect(() => {
+    pushToDataLayer({
+      event: 'view_item',
+      ecommerce: {
+        currency: 'PKR',
+        value: currentPrice,
+        items: [{
+          item_id: product._id,
+          item_name: product.name,
+          item_category: product.category?.name,
+          price: currentPrice,
+        }],
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product._id]);
 
   return (
     <div className="space-y-8">

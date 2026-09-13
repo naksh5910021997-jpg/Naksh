@@ -9,6 +9,7 @@ import {
   getPriceRange,
   getDiscountPercentage,
 } from '@/lib/pricing';
+import { pushToDataLayer } from '@/lib/gtm';
 
 export default function ProductCard({ product }) {
   const currentPrice = getProductPrice(product);
@@ -16,8 +17,22 @@ export default function ProductCard({ product }) {
   const onSale = isProductOnSale(product);
   const discountPercentage = getDiscountPercentage(currentPrice, comparePrice);
 
+  const handleProductClick = () => {
+    pushToDataLayer({
+      event: 'select_item',
+      ecommerce: {
+        items: [{
+          item_id: product._id,
+          item_name: product.name,
+          item_category: product.category?.name,
+          price: currentPrice,
+        }],
+      },
+    });
+  };
+
   return (
-    <Link href={`/products/${product.slug || product._id}`} className="group block bg-card-bg font-sans">
+    <Link href={`/products/${product.slug || product._id}`} onClick={handleProductClick} className="group block bg-card-bg font-sans">
       <div className="relative overflow-hidden border border-accent-dim group-hover:border-text transition-colors duration-500 rounded-md">
 
         {/* Product Image */}

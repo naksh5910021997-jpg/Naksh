@@ -1,0 +1,23 @@
+# Naksh Studio
+
+> Naksh Studio is a premium clothing brand based in Karachi, Pakistan, designing
+> heavy-weight, oversized-fit t-shirts and trousers. Orders are placed on the
+> website and confirmed directly with the customer via WhatsApp; delivery and
+> exchanges are currently limited to Karachi.
+
+## Key facts
+- Location: Karachi, Sindh, Pakistan
+- Products: premium t-shirts and trousers (men's essentials)
+- Ordering: browse online, then confirm the order via WhatsApp (+92 318 1058796)
+- Delivery area: Karachi only
+- Returns: no cash refunds; approved exchanges receive Online Store Credit,
+  valid 14 days, for items in unworn/unwashed condition within 14 days of delivery
+- Currency: Pakistani Rupees (PKR)
+
+## Pages
+- Homepage: https://www.nakshshop.com/
+- All products: https://www.nakshshop.com/products
+- Categories: https://www.nakshshop.com/categories
+- Our Story: https://www.nakshshop.com/about
+- Shipping Information: https://www.nakshshop.com/shipping
+- Return & Exchange Policy: https://www.nakshshop.com/returns

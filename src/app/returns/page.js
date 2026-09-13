@@ -1,12 +1,67 @@
 import Link from 'next/link';
+import Script from 'next/script';
 import Navbar from '@/components/ui/Navbar';
 import Footer from '@/components/ui/Footer';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Return & Exchange Policy — Naksh Studio',
-  description: 'Learn how exchanges, store credit, and refunds work at Naksh Studio.',
+  title: 'Return & Exchange Policy',
+  description:
+    'How exchanges, store credit, and refunds work at Naksh Studio — delivery and exchanges within Karachi, Pakistan only.',
+  alternates: { canonical: '/returns' },
+  openGraph: {
+    title: 'Return & Exchange Policy — Naksh Studio',
+    description: 'How exchanges, store credit, and refunds work at Naksh Studio.',
+    url: '/returns',
+  },
+};
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Do you deliver and exchange outside Karachi?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No, Naksh Studio currently delivers and processes exchanges within Karachi only.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Do I get a cash refund or store credit?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Naksh Studio operates a strict no cash refund policy. If you are not 100% satisfied, you receive Online Store Credit for the item’s value (excluding shipping). Cash refunds are only issued for damaged, defective, or incorrectly delivered items.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How long do I have to request an exchange?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Exchange requests must be submitted within 14 days of receiving your order. Store credit then remains valid for 14 days from the date the returned item is received and verified.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How do I start an exchange?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Message Naksh Studio on WhatsApp with your Order ID and clear photos of the item. Once approved, courier return details are shared on WhatsApp.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can I exchange a sale item?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No, sale items are final and cannot be exchanged or refunded.',
+      },
+    },
+  ],
 };
 
 const WHATSAPP_NUMBER = '03712367217';
@@ -65,6 +120,9 @@ export default function ReturnsPage() {
 
   return (
     <div className="bg-main-bg min-h-screen font-sans">
+      <Script id="ld-faq" type="application/ld+json">
+        {JSON.stringify(faqJsonLd)}
+      </Script>
       <Navbar />
 
       <main className="container mx-auto px-6 pt-32 pb-24 max-w-4xl">

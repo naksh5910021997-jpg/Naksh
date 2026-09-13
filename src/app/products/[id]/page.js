@@ -1,10 +1,13 @@
 import Link from 'next/link';
+import Script from 'next/script';
 import Navbar from '@/components/ui/Navbar';
 import Footer from '@/components/ui/Footer';
 import ProductGallery from '@/components/products/ProductGallery';
 import ProductPurchasePanel from '@/components/products/ProductPurchasePanel';
 import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
+import { SITE_URL } from '@/lib/seo';
+import { getProductPrice, getComparePrice } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,9 +32,30 @@ export async function generateMetadata({ params }) {
   const { id } = await params;
   const product = await getProduct(id);
   if (!product) return { title: 'Product Not Found' };
+
+  const description = product.metaDescription || product.shortDescription || product.description;
+  const path = `/products/${product.slug || product._id}`;
+  const image = product.images?.[0]?.url;
+
   return {
-    title: `${product.name} — Naksh Studio`,
-    description: product.shortDescription || product.description,
+    title: product.metaTitle || product.name,
+    description,
+    keywords: product.keywords?.length
+      ? product.keywords
+      : [product.name, product.category?.name, 'Naksh Studio', 'Karachi', 'Pakistan'].filter(Boolean),
+    alternates: { canonical: path },
+    openGraph: {
+      title: product.name,
+      description,
+      url: path,
+      images: image ? [{ url: image, alt: product.name }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: product.name,
+      description,
+      images: image ? [image] : undefined,
+    },
   };
 }
 
@@ -48,8 +72,58 @@ export default async function ProductDetailPage({ params }) {
     );
   }
 // console.log('Product data:', product); // Debugging line to check the product data
+  const price = getProductPrice(product);
+  const totalStock = product.sizes?.length
+    ? product.sizes.reduce((sum, size) => sum + (size.stock || 0), 0)
+    : (product.totalStock || 0);
+  const productPath = `/products/${product.slug || product._id}`;
+
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.shortDescription || product.description,
+    image: product.images?.map((img) => img.url),
+    sku: product.productSku || product.sku,
+    brand: { '@type': 'Brand', name: product.brand || 'Naksh Studio' },
+    category: product.category?.name,
+    offers: {
+      '@type': 'Offer',
+      url: `${SITE_URL}${productPath}`,
+      priceCurrency: 'PKR',
+      price,
+      availability: totalStock > 0
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+    },
+    ...(product.rating > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: product.rating,
+        reviewCount: product.numReviews || 1,
+      },
+    }),
+  };
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Products', item: `${SITE_URL}/products` },
+      { '@type': 'ListItem', position: 3, name: product.name, item: `${SITE_URL}${productPath}` },
+    ],
+  };
+
   return (
     <div className="bg-main-bg min-h-screen font-sans">
+      <Script id="ld-product" type="application/ld+json">
+        {JSON.stringify(productJsonLd)}
+      </Script>
+      <Script id="ld-breadcrumb" type="application/ld+json">
+        {JSON.stringify(breadcrumbJsonLd)}
+      </Script>
       <Navbar />
 
       <main className="container mx-auto pt-20 px-6 py-12">

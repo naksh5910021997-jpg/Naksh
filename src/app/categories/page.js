@@ -6,6 +6,18 @@ import Category from '@/models/Category';
 
 export const dynamic = 'force-dynamic';
 
+export const metadata = {
+  title: 'Shop by Category',
+  description:
+    'Explore Naksh Studio’s clothing categories — t-shirts, trousers and more. Premium apparel, delivered across Karachi, Pakistan.',
+  alternates: { canonical: '/categories' },
+  openGraph: {
+    title: 'Shop by Category — Naksh Studio',
+    description: 'Explore Naksh Studio’s clothing categories — t-shirts, trousers and more.',
+    url: '/categories',
+  },
+};
+
 async function getCategories() {
   try {
     await connectDB();

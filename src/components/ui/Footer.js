@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { BUSINESS } from '@/lib/seo';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -21,7 +22,8 @@ export default function Footer() {
             <p className="text-card-bg opacity-60 text-[11px] uppercase tracking-widest leading-relaxed max-w-xs">
               Refining the essentials. <br />
               Premium apparel engineered for <br />
-              the modern silhouette.
+              the modern silhouette. <br />
+              Proudly based in Karachi, Pakistan.
             </p>
           </div>
 
@@ -50,8 +52,12 @@ export default function Footer() {
             <h4 className={sectionTitleStyles}>Contact</h4>
             <ul className="space-y-4 text-card-bg opacity-60 text-[11px] uppercase tracking-widest">
               <li className="hover:opacity-100 transition-all cursor-pointer">it@Naksh.com</li>
-              <li>+91 1234567890</li>
-              <li className="mt-6 opacity-40">Studio: India</li>
+              <li>
+                <a href={`https://wa.me/${BUSINESS.whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-all">
+                  {BUSINESS.telephone}
+                </a>
+              </li>
+              <li className="mt-6 opacity-40">Studio: {BUSINESS.addressLocality}, Pakistan</li>
             </ul>
           </div>
         </div>

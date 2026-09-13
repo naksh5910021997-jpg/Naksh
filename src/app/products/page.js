@@ -3,6 +3,18 @@
 import { Suspense } from 'react';
 import ProductsPageContent from '../../components/products/ProductsPageContent';
 
+export const metadata = {
+  title: 'Shop All T-Shirts & Trousers Online in Pakistan',
+  description:
+    'Browse Naksh Studio’s full collection of premium t-shirts and trousers. Order online, delivery across Karachi, confirm your order via WhatsApp.',
+  alternates: { canonical: '/products' },
+  openGraph: {
+    title: 'Shop All T-Shirts & Trousers — Naksh Studio',
+    description: 'Browse the full Naksh Studio collection. Karachi delivery, WhatsApp ordering.',
+    url: '/products',
+  },
+};
+
 export default function ProductsPage() {
   return (
     <Suspense fallback={<ProductsPageLoading />}>

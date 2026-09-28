@@ -51,6 +51,7 @@ export default function Navbar() {
     { href: '/products?garmentType=tshirt', label: 'T-Shirts' },
     { href: '/products?garmentType=trouser', label: 'Trousers' },
     { href: '/categories', label: 'Categories' },
+    { href: '/contact', label: 'Contact' },
   ];
 
   const isNavLinkActive = (href) => {
@@ -95,7 +96,14 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-6">
             {user ? (
               <div className="flex items-center gap-6">
-                <span className="text-[10px] uppercase font-mono text-text opacity-60">{user.name}</span>
+                {user.role !== 'admin' && (
+                  <span className="text-[10px] uppercase font-mono text-text opacity-60">{user.name}</span>
+                )}
+                {user.role === 'admin' && (
+                  <Link href="/admin" className="text-[10px] uppercase font-bold tracking-widest bg-text text-card-bg px-4 py-2 rounded-sm hover:opacity-80 transition-opacity">
+                    Admin
+                  </Link>
+                )}
                 <button onClick={handleLogout} className="text-[10px] uppercase font-bold text-red-500">Logout</button>
               </div>
             ) : (
@@ -139,7 +147,12 @@ export default function Navbar() {
           {!user ? (
             <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold uppercase tracking-widest text-text">Login</Link>
           ) : (
-            <button onClick={handleLogout} className="text-left text-xl font-bold uppercase text-red-500">Logout</button>
+            <>
+              {user.role === 'admin' && (
+                <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold uppercase tracking-widest text-text">Admin Panel</Link>
+              )}
+              <button onClick={handleLogout} className="text-left text-xl font-bold uppercase text-red-500">Logout</button>
+            </>
           )}
         </div>
       </div>

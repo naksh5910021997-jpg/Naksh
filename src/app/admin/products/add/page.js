@@ -43,7 +43,7 @@ export default function AddProductPage() {
       {/* Footer Note */}
       <div className="flex items-center gap-4 opacity-20 grayscale pointer-events-none">
         <div className="h-[1px] flex-1 bg-black"></div>
-        <span className="text-[10px] font-black uppercase tracking-[0.5em]">Naksh Studio System</span>
+        <span className="text-[10px] font-black uppercase tracking-[0.5em]">Naksh Shop System</span>
         <div className="h-[1px] flex-1 bg-black"></div>
       </div>
     </div>

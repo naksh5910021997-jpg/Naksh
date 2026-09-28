@@ -44,6 +44,7 @@ export default function Footer() {
               <li><Link href="/about" className={footerLinkStyles}>Our Story</Link></li>
               <li><Link href="/shipping" className={footerLinkStyles}>Shipping</Link></li>
               <li><Link href="/returns" className={footerLinkStyles}>Returns</Link></li>
+              <li><Link href="/contact" className={footerLinkStyles}>Contact Us</Link></li>
             </ul>
           </div>
 
@@ -51,13 +52,17 @@ export default function Footer() {
           <div className="md:col-span-4 md:text-right">
             <h4 className={sectionTitleStyles}>Contact</h4>
             <ul className="space-y-4 text-card-bg opacity-60 text-[11px] uppercase tracking-widest">
-              <li className="hover:opacity-100 transition-all cursor-pointer">it@Naksh.com</li>
+              <li>
+                <a href={`mailto:${BUSINESS.email}`} className="hover:opacity-100 transition-all normal-case">
+                  {BUSINESS.email}
+                </a>
+              </li>
               <li>
                 <a href={`https://wa.me/${BUSINESS.whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-all">
                   {BUSINESS.telephone}
                 </a>
               </li>
-              <li className="mt-6 opacity-40">Studio: {BUSINESS.addressLocality}, Pakistan</li>
+              <li className="mt-6 opacity-40">Store: {BUSINESS.addressLocality}, Pakistan</li>
             </ul>
           </div>
         </div>
@@ -65,14 +70,14 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-card-bg/5 mt-20 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-[9px] font-mono text-card-bg opacity-40 tracking-widest uppercase">
-            &copy; {currentYear} Naksh STUDIO / ALL RIGHTS RESERVED
+            &copy; {currentYear} Naksh SHOP / ALL RIGHTS RESERVED
           </div>
 
           {/* Social Links */}
           <div className="flex gap-8">
-            <Link href="#" className="text-[9px] font-mono text-card-bg opacity-40 hover:opacity-100 uppercase tracking-widest transition-all">Instagram</Link>
-            <Link href="#" className="text-[9px] font-mono text-card-bg opacity-40 hover:opacity-100 uppercase tracking-widest transition-all">Twitter</Link>
-            <Link href="#" className="text-[9px] font-mono text-card-bg opacity-40 hover:opacity-100 uppercase tracking-widest transition-all">Legal</Link>
+            <a href={BUSINESS.instagram} target="_blank" rel="noopener noreferrer" className="text-[9px] font-mono text-card-bg opacity-40 hover:opacity-100 uppercase tracking-widest transition-all">Instagram</a>
+            <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-[9px] font-mono text-card-bg opacity-40 hover:opacity-100 uppercase tracking-widest transition-all">Facebook</a>
+            <Link href="/returns" className="text-[9px] font-mono text-card-bg opacity-40 hover:opacity-100 uppercase tracking-widest transition-all">Legal</Link>
           </div>
         </div>
       </div>

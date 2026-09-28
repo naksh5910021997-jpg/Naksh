@@ -6,12 +6,12 @@ import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, BUSINESS } from '@/lib/seo';
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Naksh Studio — Premium T-Shirts & Trousers in Karachi, Pakistan',
-    template: '%s — Naksh Studio',
+    default: 'Naksh Shop — Premium T-Shirts & Trousers in Karachi, Pakistan',
+    template: '%s — Naksh Shop',
   },
   description: SITE_DESCRIPTION,
   keywords: [
-    'Naksh Studio',
+    'Naksh Shop',
     'clothing brand Karachi',
     'clothing brand Pakistan',
     'premium t-shirts Pakistan',
@@ -30,13 +30,13 @@ export const metadata = {
     locale: 'en_PK',
     url: '/',
     siteName: SITE_NAME,
-    title: 'Naksh Studio — Premium T-Shirts & Trousers in Karachi, Pakistan',
+    title: 'Naksh Shop — Premium T-Shirts & Trousers in Karachi, Pakistan',
     description: SITE_DESCRIPTION,
     images: [{ url: '/logo.png', width: 500, height: 500, alt: SITE_NAME }],
   },
   twitter: {
     card: 'summary',
-    title: 'Naksh Studio — Premium T-Shirts & Trousers in Karachi, Pakistan',
+    title: 'Naksh Shop — Premium T-Shirts & Trousers in Karachi, Pakistan',
     description: SITE_DESCRIPTION,
     images: ['/logo.png'],
   },
@@ -55,6 +55,8 @@ const organizationJsonLd = {
   logo: `${SITE_URL}/logo.png`,
   image: `${SITE_URL}/logo.png`,
   telephone: BUSINESS.telephone,
+  email: BUSINESS.email,
+  sameAs: [BUSINESS.instagram, BUSINESS.facebook],
   priceRange: 'Rs',
   areaServed: {
     '@type': 'City',

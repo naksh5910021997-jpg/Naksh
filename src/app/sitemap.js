@@ -11,6 +11,7 @@ export default async function sitemap() {
     { url: `${SITE_URL}/returns`, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${SITE_URL}/about`, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${SITE_URL}/shipping`, changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${SITE_URL}/contact`, changeFrequency: 'monthly', priority: 0.4 },
   ];
 
   try {

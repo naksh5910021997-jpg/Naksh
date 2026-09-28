@@ -2,17 +2,18 @@ import Link from 'next/link';
 import Script from 'next/script';
 import Navbar from '@/components/ui/Navbar';
 import Footer from '@/components/ui/Footer';
+import { BUSINESS } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Return & Exchange Policy',
   description:
-    'How exchanges, store credit, and refunds work at Naksh Studio — delivery and exchanges within Karachi, Pakistan only.',
+    'How exchanges, store credit, and refunds work at Naksh Shop — delivery and exchanges within Karachi, Pakistan only.',
   alternates: { canonical: '/returns' },
   openGraph: {
-    title: 'Return & Exchange Policy — Naksh Studio',
-    description: 'How exchanges, store credit, and refunds work at Naksh Studio.',
+    title: 'Return & Exchange Policy — Naksh Shop',
+    description: 'How exchanges, store credit, and refunds work at Naksh Shop.',
     url: '/returns',
   },
 };
@@ -26,7 +27,7 @@ const faqJsonLd = {
       name: 'Do you deliver and exchange outside Karachi?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No, Naksh Studio currently delivers and processes exchanges within Karachi only.',
+        text: 'No, Naksh Shop currently delivers and processes exchanges within Karachi only.',
       },
     },
     {
@@ -34,7 +35,7 @@ const faqJsonLd = {
       name: 'Do I get a cash refund or store credit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Naksh Studio operates a strict no cash refund policy. If you are not 100% satisfied, you receive Online Store Credit for the item’s value (excluding shipping). Cash refunds are only issued for damaged, defective, or incorrectly delivered items.',
+        text: 'Naksh Shop operates a strict no cash refund policy. If you are not 100% satisfied, you receive Online Store Credit for the item’s value (excluding shipping). Cash refunds are only issued for damaged, defective, or incorrectly delivered items.',
       },
     },
     {
@@ -50,7 +51,7 @@ const faqJsonLd = {
       name: 'How do I start an exchange?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Message Naksh Studio on WhatsApp with your Order ID and clear photos of the item. Once approved, courier return details are shared on WhatsApp.',
+        text: 'Message Naksh Shop on WhatsApp with your Order ID and clear photos of the item. Once approved, courier return details are shared on WhatsApp.',
       },
     },
     {
@@ -63,8 +64,6 @@ const faqJsonLd = {
     },
   ],
 };
-
-const WHATSAPP_NUMBER = '03712367217';
 
 const timeline = [
   {
@@ -101,7 +100,7 @@ const steps = [
   {
     n: '01',
     title: 'Message Us',
-    detail: `Message us on WhatsApp at ${WHATSAPP_NUMBER} with your Order ID and clear photos of the item.`,
+    detail: `Message us on WhatsApp at ${BUSINESS.telephone} with your Order ID and clear photos of the item.`,
   },
   {
     n: '02',
@@ -116,7 +115,7 @@ const steps = [
 ];
 
 export default function ReturnsPage() {
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/^0/, '92')}`;
+  const whatsappUrl = `https://wa.me/${BUSINESS.whatsapp}`;
 
   return (
     <div className="bg-main-bg min-h-screen font-sans">
@@ -136,7 +135,7 @@ export default function ReturnsPage() {
         {/* Header */}
         <header className="mb-16">
           <span className="text-[10px] uppercase tracking-[0.3em] font-black text-text opacity-60 mb-3 block">
-            Naksh Studio
+            Naksh Shop
           </span>
           <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none text-text mb-6">
             Return &amp; Exchange Policy

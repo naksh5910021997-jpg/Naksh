@@ -6,11 +6,11 @@ import ProductsPageContent from '../../components/products/ProductsPageContent';
 export const metadata = {
   title: 'Shop All T-Shirts & Trousers Online in Pakistan',
   description:
-    'Browse Naksh Studio’s full collection of premium t-shirts and trousers. Order online, delivery across Karachi, confirm your order via WhatsApp.',
+    'Browse Naksh Shop’s full collection of premium t-shirts and trousers. Order online, delivery across Karachi, confirm your order via WhatsApp.',
   alternates: { canonical: '/products' },
   openGraph: {
-    title: 'Shop All T-Shirts & Trousers — Naksh Studio',
-    description: 'Browse the full Naksh Studio collection. Karachi delivery, WhatsApp ordering.',
+    title: 'Shop All T-Shirts & Trousers — Naksh Shop',
+    description: 'Browse the full Naksh Shop collection. Karachi delivery, WhatsApp ordering.',
     url: '/products',
   },
 };

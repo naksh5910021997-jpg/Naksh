@@ -36,7 +36,7 @@ export async function generateMetadata({ params }) {
 
   const description =
     category.description ||
-    `Shop ${category.name} at Naksh Studio — premium clothing, delivered across Karachi, Pakistan.`;
+    `Shop ${category.name} at Naksh Shop — premium clothing, delivered across Karachi, Pakistan.`;
   const path = `/categories/${category.slug}`;
 
   return {

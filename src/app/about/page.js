@@ -9,11 +9,11 @@ export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Our Story',
   description:
-    'Naksh Studio is a premium clothing brand based in Karachi, Pakistan, focused on heavy-weight t-shirts and trousers built for everyday wear.',
+    'Naksh Shop is a premium clothing brand based in Karachi, Pakistan, focused on heavy-weight t-shirts and trousers built for everyday wear.',
   alternates: { canonical: '/about' },
   openGraph: {
-    title: 'Our Story — Naksh Studio',
-    description: 'Naksh Studio is a premium clothing brand based in Karachi, Pakistan.',
+    title: 'Our Story — Naksh Shop',
+    description: 'Naksh Shop is a premium clothing brand based in Karachi, Pakistan.',
     url: '/about',
   },
 };
@@ -24,9 +24,9 @@ const aboutJsonLd = {
   url: `${SITE_URL}/about`,
   mainEntity: {
     '@type': 'ClothingStore',
-    name: 'Naksh Studio',
+    name: 'Naksh Shop',
     description:
-      'Naksh Studio is a Karachi, Pakistan based clothing brand designing premium, heavy-weight t-shirts and trousers. Orders are placed online and confirmed via WhatsApp, with delivery across Karachi.',
+      'Naksh Shop is a Karachi, Pakistan based clothing brand designing premium, heavy-weight t-shirts and trousers. Orders are placed online and confirmed via WhatsApp, with delivery across Karachi.',
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Karachi',
@@ -68,13 +68,13 @@ export default function AboutPage() {
 
         <header className="mb-16">
           <span className="text-[10px] uppercase tracking-[0.3em] font-black text-text opacity-60 mb-3 block">
-            Naksh Studio
+            Naksh Shop
           </span>
           <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none text-text mb-6">
             Our Story
           </h1>
           <p className="text-text opacity-70 text-sm md:text-base leading-relaxed max-w-2xl font-medium">
-            Naksh Studio is a clothing brand based in <strong className="text-text opacity-100">Karachi, Pakistan</strong>,
+            Naksh Shop is a clothing brand based in <strong className="text-text opacity-100">Karachi, Pakistan</strong>,
             designing heavy-weight t-shirts and trousers for everyday wear. We keep things simple:
             good fabric, honest pricing, and orders confirmed directly with you over WhatsApp.
           </p>

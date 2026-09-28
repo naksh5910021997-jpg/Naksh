@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getEffectiveSizePrice, getEffectiveSizeComparePrice } from '@/lib/pricing';
 import { pushToDataLayer } from '@/lib/gtm';
+import { BUSINESS } from '@/lib/seo';
 
 export default function ProductPurchasePanel({ product }) {
   const sizes = product.sizes || [];
@@ -12,6 +13,8 @@ export default function ProductPurchasePanel({ product }) {
   const [selectedSize, setSelectedSize] = useState(defaultSize?.size || '');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
+  // null | { type: 'success' | 'error', url }
+  const [orderStatus, setOrderStatus] = useState(null);
 
   const activeSize = sizes.length > 0
     ? sizes.find(s => s.size === selectedSize) || defaultSize
@@ -41,7 +44,7 @@ export default function ProductPurchasePanel({ product }) {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const productUrl = `${baseUrl}/products/${product.slug || product._id}`;
 
-    let message = `🛍️ *Order Inquiry - Naksh Studio*\n\n`;
+    let message = `🛍️ *Order Inquiry - Naksh Shop*\n\n`;
     message += `*Product:* ${product.name}\n`;
     message += `*SKU:* ${product.productSku || product.sku || 'N/A'}\n`;
     message += `*Category:* ${product.category?.name || 'N/A'}\n`;
@@ -69,7 +72,7 @@ export default function ProductPurchasePanel({ product }) {
   };
 
   const handleWhatsAppOrder = () => {
-    const whatsappNumber = '03181058796';
+    const whatsappNumber = BUSINESS.whatsapp;
     const message = generateWhatsAppMessage();
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
 
@@ -89,7 +92,9 @@ export default function ProductPurchasePanel({ product }) {
       },
     });
 
-    window.open(whatsappUrl, '_blank');
+    const win = window.open(whatsappUrl, '_blank');
+    // A null window means the popup was blocked, so WhatsApp never opened.
+    setOrderStatus({ type: win ? 'success' : 'error', url: whatsappUrl });
   };
 
   const needsSizeSelection = sizes.length > 0 && !activeSize;
@@ -287,6 +292,24 @@ export default function ProductPurchasePanel({ product }) {
             : 'Order via WhatsApp'
         }
       </button>
+
+      {orderStatus?.type === 'success' && (
+        <div role="status" className="border border-green-500 bg-green-50 text-green-700 rounded-md px-4 py-3 text-xs font-medium flex items-start justify-between gap-3">
+          <p>
+            <strong className="block font-black uppercase tracking-widest text-[10px] mb-1">✓ Order details ready on WhatsApp</strong>
+            Press <strong>Send</strong> in WhatsApp to place your order. We&apos;ll confirm availability and delivery with you there.
+          </p>
+          <button type="button" onClick={() => setOrderStatus(null)} aria-label="Dismiss" className="opacity-60 hover:opacity-100">×</button>
+        </div>
+      )}
+      {orderStatus?.type === 'error' && (
+        <div role="alert" className="border border-red-500 bg-red-50 text-red-600 rounded-md px-4 py-3 text-xs font-medium">
+          <strong className="block font-black uppercase tracking-widest text-[10px] mb-1">WhatsApp couldn&apos;t open</strong>
+          Your browser may have blocked the popup.{' '}
+          <a href={orderStatus.url} target="_blank" rel="noopener noreferrer" className="underline font-bold">Tap here to open WhatsApp</a>{' '}
+          or message us at {BUSINESS.telephone}.
+        </div>
+      )}
 
       {/* Info Text */}
       <p className="text-[9px] text-text opacity-60 text-center leading-relaxed">

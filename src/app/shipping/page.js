@@ -8,11 +8,11 @@ export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Shipping Information',
   description:
-    'Naksh Studio delivers within Karachi only. Orders are confirmed via WhatsApp before dispatch.',
+    'Naksh Shop delivers within Karachi only. Orders are confirmed via WhatsApp before dispatch.',
   alternates: { canonical: '/shipping' },
   openGraph: {
-    title: 'Shipping Information — Naksh Studio',
-    description: 'Naksh Studio delivers within Karachi only. Orders are confirmed via WhatsApp before dispatch.',
+    title: 'Shipping Information — Naksh Shop',
+    description: 'Naksh Shop delivers within Karachi only. Orders are confirmed via WhatsApp before dispatch.',
     url: '/shipping',
   },
 };
@@ -51,7 +51,7 @@ export default function ShippingPage() {
 
         <header className="mb-16">
           <span className="text-[10px] uppercase tracking-[0.3em] font-black text-text opacity-60 mb-3 block">
-            Naksh Studio
+            Naksh Shop
           </span>
           <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none text-text mb-6">
             Shipping Information

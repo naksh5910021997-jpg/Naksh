@@ -42,7 +42,7 @@ export async function generateMetadata({ params }) {
     description,
     keywords: product.keywords?.length
       ? product.keywords
-      : [product.name, product.category?.name, 'Naksh Studio', 'Karachi', 'Pakistan'].filter(Boolean),
+      : [product.name, product.category?.name, 'Naksh Shop', 'Karachi', 'Pakistan'].filter(Boolean),
     alternates: { canonical: path },
     openGraph: {
       title: product.name,
@@ -85,7 +85,7 @@ export default async function ProductDetailPage({ params }) {
     description: product.shortDescription || product.description,
     image: product.images?.map((img) => img.url),
     sku: product.productSku || product.sku,
-    brand: { '@type': 'Brand', name: product.brand || 'Naksh Studio' },
+    brand: { '@type': 'Brand', name: product.brand || 'Naksh Shop' },
     category: product.category?.name,
     offers: {
       '@type': 'Offer',

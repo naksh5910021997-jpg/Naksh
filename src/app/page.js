@@ -116,26 +116,35 @@ export default async function HomePage() {
       <Navbar />
 
       {/* HERO SECTION */}
-      <section className="bg-card-bg pt-16 pb-24 border-b border-accent-dim">
-        <div className="container mx-auto px-4 mt-10 text-center">
-          <div className="inline-block px-3 py-1 border border-text text-[10px] uppercase tracking-[0.3em] font-bold mb-8 rounded-sm">
-            Est... 2026
-          </div>
-          <h1 className="text-7xl md:text-9xl font-black uppercase tracking-tighter leading-[0.8] mb-10 text-text">
-            Naksh <br />
-            <span className="text-outline-md text-transparent">Studio</span>
-          </h1>
-          <p className="max-w-xl mx-auto text-text text-sm md:text-base font-medium leading-relaxed mb-12 opacity-70">
-            Focusing on form and function. Our essential collection features heavy-weight fabrics and oversized silhouettes.
-          </p>
-          <div className="flex justify-center border border-text max-w-fit mx-auto overflow-hidden rounded-sm">
-            <Link href="/products" className="bg-text text-card-bg px-12 py-5 text-xs uppercase font-bold tracking-widest hover:opacity-80 transition-all border-r border-text">
-              Shop All
+      <section className="bg-card-bg border-b border-accent-dim">
+        <h1 className="sr-only">Naksh Shop — Comfortable Everyday Wear, Delivered Across Karachi</h1>
+        <div className="relative w-full aspect-[2172/724]">
+          <Image
+            src="/banner-nakshshop.png"
+            alt="Naksh Shop — comfortable everyday wear for your little ones. Free delivery in Karachi."
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+          {/* Buttons overlaid at the bottom on larger screens */}
+          <div className="hidden lg:flex absolute bottom-[2.5%] left-[21%] w-[43%] justify-center gap-4">
+            <Link href="/products" className="bg-text text-card-bg px-10 py-3 text-xs uppercase font-bold tracking-widest hover:opacity-80 transition-all rounded-sm shadow-lg">
+              Shop Now
             </Link>
-            <Link href="/categories" className="bg-card-bg text-text px-12 py-5 text-xs uppercase font-bold tracking-widest hover:bg-text hover:text-card-bg transition-all">
-              Catalog
+            <Link href="/categories" className="bg-card-bg text-text border border-text px-10 py-3 text-xs uppercase font-bold tracking-widest hover:bg-text hover:text-card-bg transition-all rounded-sm shadow-lg">
+              Category
             </Link>
           </div>
+        </div>
+        {/* Buttons below the banner on mobile */}
+        <div className="lg:hidden flex justify-center gap-3 px-4 py-6">
+          <Link href="/products" className="flex-1 text-center bg-text text-card-bg py-4 text-xs uppercase font-bold tracking-widest hover:opacity-80 transition-all rounded-sm">
+            Shop Now
+          </Link>
+          <Link href="/categories" className="flex-1 text-center bg-card-bg text-text border border-text py-4 text-xs uppercase font-bold tracking-widest hover:bg-text hover:text-card-bg transition-all rounded-sm">
+            Category
+          </Link>
         </div>
       </section>
 

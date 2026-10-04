@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
 import { ALL_PRODUCT_TYPES, ALL_SIZES } from '@/lib/product-config';
+// Products populate 'category'. Importing the model here registers it with
+// mongoose on every route that uses Product, otherwise a fresh server/serverless
+// instance throws MissingSchemaError until some other page loads Category.
+import './Category';
 
 const ProductSchema = new mongoose.Schema({
   name: {

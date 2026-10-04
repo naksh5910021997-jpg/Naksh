@@ -124,7 +124,7 @@ export default function ReturnsPage() {
       </Script>
       <Navbar />
 
-      <main className="container mx-auto px-6 pt-32 pb-24 max-w-4xl">
+      <main className="container mx-auto px-6 pt-12 pb-24 max-w-4xl">
         {/* Breadcrumb */}
         <nav className="text-[10px] uppercase tracking-[0.2em] font-bold text-text opacity-60 mb-10 flex gap-2">
           <Link href="/" className="hover:opacity-100">Home</Link>

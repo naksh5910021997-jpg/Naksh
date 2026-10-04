@@ -131,7 +131,7 @@ export default function ProductsPageContent() {
   };
 
   return (
-    <div className="bg-main-bg min-h-screen pt-20 flex flex-col font-sans">
+    <div className="bg-main-bg min-h-screen flex flex-col font-sans">
       <Navbar />
 
       <main className="flex-grow container mx-auto px-6 py-10">

@@ -53,7 +53,7 @@ export default async function CategoryPage({ params }) {
 
   if (!category) {
     return (
-      <div className="min-h-screen bg-main-bg pt-20 flex flex-col font-sans">
+      <div className="min-h-screen bg-main-bg flex flex-col font-sans">
         <Navbar />
         <div className="flex-grow flex flex-col items-center justify-center p-6">
           <h1 className="text-2xl font-bold text-text">Category Not Found</h1>
@@ -75,7 +75,7 @@ export default async function CategoryPage({ params }) {
   };
 
   return (
-    <div className="bg-main-bg min-h-screen pt-20 flex flex-col font-sans">
+    <div className="bg-main-bg min-h-screen flex flex-col font-sans">
       <Script id="ld-breadcrumb" type="application/ld+json">
         {JSON.stringify(breadcrumbJsonLd)}
       </Script>

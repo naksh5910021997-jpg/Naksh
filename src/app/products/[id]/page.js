@@ -169,6 +169,7 @@ export default async function ProductDetailPage({ params }) {
             {/* Price, Size/Color Selection, Quantity & Order */}
             <ProductPurchasePanel product={product} />
 
+
             {/* Features */}
             {product.features?.length > 0 && (
               <div className="py-6 border-t border-accent-dim">

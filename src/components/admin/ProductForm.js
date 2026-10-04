@@ -6,9 +6,11 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import {
   GARMENT_TYPES,
   PRODUCT_TYPES,
-  SIZE_OPTIONS,
+  SIZE_TYPES,
   TROUSER_OPTIONS,
   getDefaultSizeVariants,
+  getSizeOptions,
+  getSizeLabel,
 } from '@/lib/product-config';
 
 export default function ProductForm({ product = null }) {
@@ -22,6 +24,7 @@ export default function ProductForm({ product = null }) {
   const isEditing = !!editId;
   const requestedGarmentType = searchParams.get('garmentType') === 'trouser' ? 'trouser' : 'tshirt';
   const initialGarmentType = product?.garmentType || requestedGarmentType;
+  const initialSizeType = product?.sizeType || 'adult';
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
@@ -29,6 +32,7 @@ export default function ProductForm({ product = null }) {
     basePrice: product?.basePrice || '', // Changed from price to basePrice
     category: product?.category?._id || '',
     garmentType: initialGarmentType,
+    sizeType: initialSizeType,
     productType: product?.productType || PRODUCT_TYPES[initialGarmentType][0].value,
     material: product?.material || '100% Cotton',
     fabricType: product?.fabricType || 'cotton',
@@ -54,7 +58,7 @@ export default function ProductForm({ product = null }) {
     barcode: product?.barcode || '',
     images: product?.images || [],
     // Updated sizes structure with individual pricing
-    sizes: product?.sizes?.length ? product.sizes : getDefaultSizeVariants(initialGarmentType),
+    sizes: product?.sizes?.length ? product.sizes : getDefaultSizeVariants(initialGarmentType, initialSizeType),
     colors: product?.colors || [],
     features: product?.features || [],
     careInstructions: product?.careInstructions || [
@@ -96,6 +100,7 @@ export default function ProductForm({ product = null }) {
           basePrice: p.basePrice || '',
           category: p.category?._id || p.category || '',
           garmentType: p.garmentType || 'tshirt',
+          sizeType: p.sizeType || 'adult',
           productType: p.productType || 'half-sleeve',
           material: p.material || '',
           fabricType: p.fabricType || 'cotton',
@@ -159,7 +164,16 @@ export default function ProductForm({ product = null }) {
       ...current,
       garmentType,
       productType: PRODUCT_TYPES[garmentType][0].value,
-      sizes: getDefaultSizeVariants(garmentType),
+      sizes: getDefaultSizeVariants(garmentType, current.sizeType),
+    }));
+  };
+
+  const handleSizeTypeChange = (e) => {
+    const sizeType = e.target.value;
+    setFormData((current) => ({
+      ...current,
+      sizeType,
+      sizes: getDefaultSizeVariants(current.garmentType, sizeType),
     }));
   };
 
@@ -175,7 +189,7 @@ export default function ProductForm({ product = null }) {
   };
 
   const addSize = () => {
-    const availableSizes = SIZE_OPTIONS[formData.garmentType] || SIZE_OPTIONS.tshirt;
+    const availableSizes = getSizeOptions(formData.garmentType, formData.sizeType);
     const usedSizes = formData.sizes.map(s => s.size);
     const nextSize = availableSizes.find(size => !usedSizes.includes(size));
 
@@ -492,7 +506,7 @@ export default function ProductForm({ product = null }) {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Garment <span className="text-red-500">*</span>
@@ -509,6 +523,23 @@ export default function ProductForm({ product = null }) {
                       ))}
                     </select>
                     <p className="mt-1 text-xs text-amber-600">Changing this resets size variants.</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Size Type <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="sizeType"
+                      value={formData.sizeType}
+                      onChange={handleSizeTypeChange}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all appearance-none bg-white"
+                    >
+                      {SIZE_TYPES.map((type) => (
+                        <option key={type.value} value={type.value}>{type.label}</option>
+                      ))}
+                    </select>
+                    <p className="mt-1 text-xs text-amber-600">Kids = age-wise sizes (9/12-M ... 9/10-Y). Changing this resets size variants.</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -712,7 +743,7 @@ export default function ProductForm({ product = null }) {
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-medium">
-                  {formData.garmentType === 'trouser' ? 'Waist-wise Pricing' : 'Size-wise Pricing'}
+                  {getSizeLabel(formData.garmentType, formData.sizeType)}-wise Pricing
                 </h2>
                 <button
                   type="button"
@@ -728,7 +759,7 @@ export default function ProductForm({ product = null }) {
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-medium">
-                        {formData.garmentType === 'trouser' ? 'Waist' : 'Size'} {sizeItem.size}
+                        {getSizeLabel(formData.garmentType, formData.sizeType)} {sizeItem.size}
                       </h3>
                       <button
                         type="button"

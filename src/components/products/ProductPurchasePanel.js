@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { getEffectiveSizePrice, getEffectiveSizeComparePrice } from '@/lib/pricing';
 import { pushToDataLayer } from '@/lib/gtm';
 import { BUSINESS } from '@/lib/seo';
+import SizeGuide from '@/components/products/SizeGuide';
 
 export default function ProductPurchasePanel({ product }) {
   const sizes = product.sizes || [];
@@ -160,7 +161,7 @@ export default function ProductPurchasePanel({ product }) {
       {sizes.length > 0 && (
         <div>
           <h3 className="text-[10px] uppercase tracking-widest font-black mb-3 text-text opacity-60">
-            {product.garmentType === 'trouser' ? 'Select Waist Size *' : 'Select Size *'}
+            {product.garmentType === 'trouser' && product.sizeType !== 'kids' ? 'Select Waist Size *' : 'Select Size *'}
           </h3>
           <div className="grid grid-cols-3 gap-2">
             {sizes.map((size) => {
@@ -198,6 +199,8 @@ export default function ProductPurchasePanel({ product }) {
           </div>
         </div>
       )}
+
+            <SizeGuide sizes={product.sizes} garmentType={product.garmentType} sizeType={product.sizeType} />
 
       {/* Color Selection */}
       {product.colors && product.colors.length > 0 && (

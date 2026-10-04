@@ -44,6 +44,13 @@ const ProductSchema = new mongoose.Schema({
     default: 'tshirt',
   },
 
+  // 'kids' products use age-wise sizes (9/12-M, 3/4-Y...) instead of adult sizes.
+  sizeType: {
+    type: String,
+    enum: ['adult', 'kids'],
+    default: 'adult',
+  },
+
   productType: {
     type: String,
     enum: ALL_PRODUCT_TYPES,
@@ -287,5 +294,11 @@ ProductSchema.index({ 'sizes.price': 1 });
 ProductSchema.index({ basePrice: 1 });
 ProductSchema.index({ featured: 1, status: 1 });
 ProductSchema.index({ trending: 1, status: 1 });
+
+// In development, hot reload keeps the previously compiled model (with the old
+// schema) cached on mongoose. Drop it so schema changes like new sizes apply.
+if (process.env.NODE_ENV !== 'production' && mongoose.models.Product) {
+  delete mongoose.models.Product;
+}
 
 export default mongoose.models.Product || mongoose.model('Product', ProductSchema);

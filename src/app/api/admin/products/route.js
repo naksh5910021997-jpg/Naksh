@@ -3,7 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { authMiddleware } from '@/middleware/auth';
 import { deleteMultipleImages, uploadImage } from '@/lib/cloudinary';
-import { PRODUCT_TYPES, SIZE_OPTIONS } from '@/lib/product-config';
+import { PRODUCT_TYPES, getSizeOptions } from '@/lib/product-config';
 
 function normalizeProductData(data) {
   const garmentType = data.garmentType || 'tshirt';
@@ -17,12 +17,14 @@ function normalizeProductData(data) {
     throw new Error(`Please select a valid ${garmentType === 'trouser' ? 'trouser' : 'T-shirt'} type`);
   }
 
-  const allowedSizes = SIZE_OPTIONS[garmentType];
+  const sizeType = data.sizeType === 'kids' ? 'kids' : 'adult';
+  const allowedSizes = getSizeOptions(garmentType, sizeType);
   if (data.sizes?.some(({ size }) => !allowedSizes.includes(String(size)))) {
-    throw new Error(`One or more sizes are invalid for ${garmentType === 'trouser' ? 'trousers' : 'T-shirts'}`);
+    throw new Error(`One or more sizes are invalid for ${sizeType === 'kids' ? 'kids ' : ''}${garmentType === 'trouser' ? 'trousers' : 'T-shirts'}`);
   }
 
   data.garmentType = garmentType;
+  data.sizeType = sizeType;
   data.basePrice = Number(data.basePrice);
   data.totalStock = (data.sizes || []).reduce((total, size) => total + (Number(size.stock) || 0), 0);
   return data;

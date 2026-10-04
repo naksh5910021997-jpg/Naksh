@@ -13,13 +13,22 @@ if (!cached) {
 }
 
 async function connectDB() {
-  if (cached.conn) {
+  // readyState 1 = connected. A cached connection can go stale (idle timeout,
+  // network blip, serverless cold start), so only reuse it while it is live.
+  if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
+  }
+
+  // Connection dropped after it was cached: start a fresh one
+  if (cached.conn && mongoose.connection.readyState !== 2) {
+    cached.conn = null;
+    cached.promise = null;
   }
 
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 10000,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {

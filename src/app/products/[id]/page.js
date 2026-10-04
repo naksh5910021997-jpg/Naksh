@@ -1,3 +1,5 @@
+import { cache } from 'react';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Script from 'next/script';
 import Navbar from '@/components/ui/Navbar';
@@ -11,27 +13,32 @@ import { getProductPrice, getComparePrice } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
 
-async function getProduct(id) {
-  try {
-    await connectDB();
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
-    let product;
-    if (isObjectId) {
-      product = await Product.findById(id).populate('category').lean();
-    } else {
-      product = await Product.findOne({ slug: id }).populate('category').lean();
-    }
-    return product ? JSON.parse(JSON.stringify(product)) : null;
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    return null;
-  }
+async function findProduct(id) {
+  await connectDB();
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+  const product = isObjectId
+    ? await Product.findById(id).populate('category').lean()
+    : await Product.findOne({ slug: id }).populate('category').lean();
+  return product ? JSON.parse(JSON.stringify(product)) : null;
 }
+
+// Returns null only when the product truly doesn't exist. Database errors are
+// retried once and then thrown, so a temporary failure shows the error page
+// (HTTP 500, which crawlers retry later) instead of a "not found" page.
+// cache() lets generateMetadata and the page share a single lookup.
+const getProduct = cache(async (id) => {
+  try {
+    return await findProduct(id);
+  } catch (error) {
+    console.error('Error fetching product, retrying:', error);
+    return findProduct(id);
+  }
+});
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const product = await getProduct(id);
-  if (!product) return { title: 'Product Not Found' };
+  if (!product) notFound();
 
   const description = product.metaDescription || product.shortDescription || product.description;
   const path = `/products/${product.slug || product._id}`;
@@ -63,14 +70,7 @@ export default async function ProductDetailPage({ params }) {
   const { id } = await params;
   const product = await getProduct(id);
 
-  if (!product) {
-    return (
-       <div className="bg-main-bg min-h-screen flex flex-col justify-center items-center font-sans">
-         <h1 className="text-4xl font-black text-text">PIECE NOT FOUND</h1>
-         <Link href="/products" className="mt-4 underline text-xs tracking-widest text-text">BACK TO COLLECTION</Link>
-       </div>
-    );
-  }
+  if (!product) notFound();
 // console.log('Product data:', product); // Debugging line to check the product data
   const price = getProductPrice(product);
   const totalStock = product.sizes?.length

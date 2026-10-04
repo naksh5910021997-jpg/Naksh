@@ -42,7 +42,7 @@ export default function ProductCard({ product }) {
               src={product.images[0].url}
               alt={product.name}
               fill
-              className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-in-out"
+              className="object-cover [@media(hover:hover)]:grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-in-out"
               sizes="(max-width: 768px) 50vw, 25vw"
             />
           ) : (

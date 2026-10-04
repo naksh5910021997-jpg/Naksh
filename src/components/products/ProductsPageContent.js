@@ -7,6 +7,32 @@ import ProductCard from '@/components/products/ProductCard';
 import Footer from '@/components/ui/Footer';
 import FilterSidebar from '@/components/products/FilterSidebar';
 
+const FILTER_DEFAULTS = {
+  garmentType: '',
+  category: '',
+  type: '',
+  fit: '',
+  pattern: '',
+  fabric: '',
+  minPrice: '',
+  maxPrice: '',
+  minRating: '',
+  search: '',
+  featured: '',
+  trending: '',
+  onSale: '',
+  sortBy: 'createdAt',
+  sortOrder: 'desc',
+};
+
+function readFiltersFromURL(searchParams) {
+  return Object.fromEntries(
+    Object.entries(FILTER_DEFAULTS).map(([key, fallback]) => [key, searchParams.get(key) || fallback])
+  );
+}
+
+const sameFilters = (a, b) => Object.keys(FILTER_DEFAULTS).every((key) => a[key] === b[key]);
+
 export default function ProductsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -16,23 +42,7 @@ export default function ProductsPageContent() {
   const [loading, setLoading] = useState(true);
 
   // Initialize filters from URL params
-  const [filters, setFilters] = useState({
-    garmentType: searchParams.get('garmentType') || '',
-    category: searchParams.get('category') || '',
-    type: searchParams.get('type') || '',
-    fit: searchParams.get('fit') || '',
-    pattern: searchParams.get('pattern') || '',
-    fabric: searchParams.get('fabric') || '',
-    minPrice: searchParams.get('minPrice') || '',
-    maxPrice: searchParams.get('maxPrice') || '',
-    minRating: searchParams.get('minRating') || '',
-    search: searchParams.get('search') || '',
-    featured: searchParams.get('featured') || '',
-    trending: searchParams.get('trending') || '',
-    onSale: searchParams.get('onSale') || '',
-    sortBy: searchParams.get('sortBy') || 'createdAt',
-    sortOrder: searchParams.get('sortOrder') || 'desc',
-  });
+  const [filters, setFilters] = useState(() => readFiltersFromURL(searchParams));
 
   const [pagination, setPagination] = useState({
     page: parseInt(searchParams.get('page')) || 1,
@@ -40,6 +50,16 @@ export default function ProductsPageContent() {
     total: 0,
     pages: 0,
   });
+
+  // Keep filters in sync when the URL changes from outside this component
+  // (navbar T-Shirts/Trousers links, browser back/forward). Without this the
+  // URL updates but the listing keeps showing the old filters.
+  useEffect(() => {
+    const urlFilters = readFiltersFromURL(searchParams);
+    const urlPage = parseInt(searchParams.get('page')) || 1;
+    setFilters((prev) => (sameFilters(prev, urlFilters) ? prev : urlFilters));
+    setPagination((prev) => (prev.page === urlPage ? prev : { ...prev, page: urlPage }));
+  }, [searchParams]);
 
   useEffect(() => { fetchCategories(); }, []);
   useEffect(() => { fetchProducts(); }, [filters, pagination.page]);
@@ -108,24 +128,7 @@ export default function ProductsPageContent() {
   };
 
   const clearAllFilters = () => {
-    const clearedFilters = {
-      garmentType: '',
-      category: '',
-      type: '',
-      fit: '',
-      pattern: '',
-      fabric: '',
-      minPrice: '',
-      maxPrice: '',
-      minRating: '',
-      search: '',
-      featured: '',
-      trending: '',
-      onSale: '',
-      sortBy: 'createdAt',
-      sortOrder: 'desc',
-    };
-    setFilters(clearedFilters);
+    setFilters(FILTER_DEFAULTS);
     setPagination(prev => ({ ...prev, page: 1 }));
     router.push('/products');
   };

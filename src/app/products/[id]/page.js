@@ -234,9 +234,9 @@ export default async function ProductDetailPage({ params }) {
           </div>
         </div>
 
-        {/* Studio Notes */}
+        {/* Shop Notes */}
         <div className="mt-32 max-w-4xl mx-auto border-t border-accent-dim pt-20 text-center">
-          <h2 className="text-[11px] uppercase font-black tracking-[0.5em] mb-12 text-text opacity-60">Studio Notes & Composition</h2>
+          <h2 className="text-[11px] uppercase font-black tracking-[0.5em] mb-12 text-text opacity-60">Shop Notes & Composition</h2>
           <div className="text-text opacity-80 leading-relaxed font-medium italic text-lg">
              "{product.description}"
           </div>

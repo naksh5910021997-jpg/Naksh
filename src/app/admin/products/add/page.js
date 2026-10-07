@@ -29,7 +29,7 @@ export default function AddProductPage() {
           {/* Quick Instructions Badge */}
           <div className="hidden lg:block bg-black text-white p-6 max-w-[240px]">
             <p className="text-[9px] uppercase tracking-widest leading-relaxed opacity-70">
-              Ensure all high-resolution assets are uploaded in 3:4 aspect ratio for optimal studio display.
+              Ensure all high-resolution assets are uploaded in 3:4 aspect ratio for optimal shop display.
             </p>
           </div>
         </div>

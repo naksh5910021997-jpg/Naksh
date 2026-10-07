@@ -373,7 +373,7 @@ export default async function HomePage() {
             <div className="space-y-4">
               <span className="text-[10px] font-mono opacity-60 tracking-widest italic">Shipping</span>
               <h3 className="text-xl font-bold uppercase tracking-widest">Fast Logistics</h3>
-              <p className="opacity-70 text-sm font-light">Global reach with carbon-neutral shipping options. From our studio to your door in 48h.</p>
+              <p className="opacity-70 text-sm font-light">Global reach with carbon-neutral shipping options. From our shop to your door in 48h.</p>
             </div>
             <div className="space-y-4">
               <span className="text-[10px] font-mono opacity-60 tracking-widest italic">Ethos</span>

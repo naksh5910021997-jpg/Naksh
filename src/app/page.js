@@ -6,9 +6,25 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import Category from '@/models/Category';
 import Image from 'next/image';
+import HeroCarousel from '@/components/home/HeroCarousel';
 import { getProductPrice, getComparePrice, isProductOnSale } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
+
+const HERO_SLIDES = [
+  {
+    src: '/nakshshop-banner1.png',
+    alt: 'Buy 2, Save More — mix & match kids tees and trousers, bundle pricing now live.',
+  },
+  {
+    src: '/nakshshop-banner2.png',
+    alt: 'Naksh Kids Fashion — Trouser & Tee Combo, 10% off. Comfort, style, everyday.',
+  },
+  {
+    src: '/nakshshop-banner3.jpg',
+    alt: 'Weekend-Ready, Every Day — kids outfits for playgrounds and park days. 10% off and free delivery.',
+  },
+];
 
 async function getHomeData() {
   try {
@@ -118,34 +134,9 @@ export default async function HomePage() {
       {/* HERO SECTION */}
       <section className="bg-card-bg border-b border-accent-dim">
         <h1 className="sr-only">Naksh Shop — Comfortable Everyday Wear, Delivered Across Karachi</h1>
-        <div className="relative w-full aspect-[2172/724]">
-          <Image
-            src="/banner-nakshshop.png"
-            alt="Naksh Shop — comfortable everyday wear for your little ones. Free delivery in Karachi."
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
-          {/* Buttons overlaid at the bottom on larger screens */}
-          <div className="hidden lg:flex absolute bottom-[2.5%] left-[21%] w-[43%] justify-center gap-4">
-            <Link href="/products" className="bg-text text-card-bg px-10 py-3 text-xs uppercase font-bold tracking-widest hover:opacity-80 transition-all rounded-sm shadow-lg">
-              Shop Now
-            </Link>
-            <Link href="/categories" className="bg-card-bg text-text border border-text px-10 py-3 text-xs uppercase font-bold tracking-widest hover:bg-text hover:text-card-bg transition-all rounded-sm shadow-lg">
-              Category
-            </Link>
-          </div>
-        </div>
-        {/* Buttons below the banner on mobile */}
-        <div className="lg:hidden flex justify-center gap-3 px-4 py-6">
-          <Link href="/products" className="flex-1 text-center bg-text text-card-bg py-4 text-xs uppercase font-bold tracking-widest hover:opacity-80 transition-all rounded-sm">
-            Shop Now
-          </Link>
-          <Link href="/categories" className="flex-1 text-center bg-card-bg text-text border border-text py-4 text-xs uppercase font-bold tracking-widest hover:bg-text hover:text-card-bg transition-all rounded-sm">
-            Category
-          </Link>
-        </div>
+        <HeroCarousel slides={HERO_SLIDES} />
+        {/* Buttons below the banner */}
+       
       </section>
 
       {/* NEW ARRIVALS SECTION */}

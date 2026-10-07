@@ -1,7 +1,7 @@
-import { getEffectiveSizePrice, getEffectiveSizeComparePrice } from '@/lib/pricing';
-
-export default function SizeGuide({ sizes = [], garmentType, sizeType }) {
-  if (sizes.length === 0) return null;
+// Renders the admin-built size chart. Hidden when the product has no chart.
+export default function SizeGuide({ sizeChart }) {
+  const hasChart = sizeChart?.columns?.length > 0 && sizeChart?.rows?.length > 0;
+  if (!hasChart) return null;
 
   return (
     <details open className="group border-y border-accent-dim">
@@ -20,32 +20,19 @@ export default function SizeGuide({ sizes = [], garmentType, sizeType }) {
         <table className="w-full text-left border border-accent-dim">
           <thead className="bg-card-bg">
             <tr className="text-[10px] uppercase tracking-widest font-black text-text opacity-80">
-              <th className="px-4 py-3 border-b border-accent-dim">
-                {garmentType === 'trouser' && sizeType !== 'kids' ? 'Waist Size' : 'Size'}
-              </th>
-              <th className="px-4 py-3 border-b border-accent-dim">Price</th>
-              <th className="px-4 py-3 border-b border-accent-dim">Stock</th>
+              {sizeChart.columns.map((column, index) => (
+                <th key={index} className="px-4 py-3 border-b border-accent-dim whitespace-nowrap">{column}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {sizes.map((size) => {
-              const comparePrice = getEffectiveSizeComparePrice(size);
-              const inStock = size.stock > 0;
-              return (
-                <tr key={size.size} className="text-[11px] font-bold text-text border-b border-accent-dim last:border-b-0">
-                  <td className="px-4 py-2.5 uppercase tracking-widest">{size.size}</td>
-                  <td className="px-4 py-2.5">
-                    Rs {getEffectiveSizePrice(size)}
-                    {comparePrice && (
-                      <span className="ml-2 text-[10px] opacity-50 line-through">Rs {comparePrice}</span>
-                    )}
-                  </td>
-                  <td className={`px-4 py-2.5 uppercase text-[10px] tracking-widest ${inStock ? 'text-green-600' : 'text-red-500'}`}>
-                    {inStock ? 'In Stock' : 'Sold Out'}
-                  </td>
-                </tr>
-              );
-            })}
+            {sizeChart.rows.map((row, rowIndex) => (
+              <tr key={rowIndex} className="text-[11px] font-bold text-text border-b border-accent-dim last:border-b-0">
+                {row.map((cell, index) => (
+                  <td key={index} className="px-4 py-2.5 whitespace-nowrap">{cell || '-'}</td>
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

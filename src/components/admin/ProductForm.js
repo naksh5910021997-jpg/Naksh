@@ -6,12 +6,13 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import {
   GARMENT_TYPES,
   PRODUCT_TYPES,
-  SIZE_TYPES,
   TROUSER_OPTIONS,
   getDefaultSizeVariants,
   getSizeOptions,
   getSizeLabel,
 } from '@/lib/product-config';
+
+const EMPTY_SIZE_CHART = { columns: ['Size', 'Chest'], rows: [] };
 
 export default function ProductForm({ product = null }) {
   const router = useRouter();
@@ -24,7 +25,6 @@ export default function ProductForm({ product = null }) {
   const isEditing = !!editId;
   const requestedGarmentType = searchParams.get('garmentType') === 'trouser' ? 'trouser' : 'tshirt';
   const initialGarmentType = product?.garmentType || requestedGarmentType;
-  const initialSizeType = product?.sizeType || 'adult';
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
@@ -32,7 +32,6 @@ export default function ProductForm({ product = null }) {
     basePrice: product?.basePrice || '', // Changed from price to basePrice
     category: product?.category?._id || '',
     garmentType: initialGarmentType,
-    sizeType: initialSizeType,
     productType: product?.productType || PRODUCT_TYPES[initialGarmentType][0].value,
     material: product?.material || '100% Cotton',
     fabricType: product?.fabricType || 'cotton',
@@ -58,7 +57,7 @@ export default function ProductForm({ product = null }) {
     barcode: product?.barcode || '',
     images: product?.images || [],
     // Updated sizes structure with individual pricing
-    sizes: product?.sizes?.length ? product.sizes : getDefaultSizeVariants(initialGarmentType, initialSizeType),
+    sizes: product?.sizes?.length ? product.sizes : getDefaultSizeVariants(initialGarmentType),
     colors: product?.colors || [],
     features: product?.features || [],
     careInstructions: product?.careInstructions || [
@@ -72,6 +71,7 @@ export default function ProductForm({ product = null }) {
     metaDescription: product?.metaDescription || '',
     keywords: product?.keywords || [],
     lowStockThreshold: product?.lowStockThreshold || 5,
+    sizeChart: product?.sizeChart?.columns?.length ? product.sizeChart : EMPTY_SIZE_CHART,
   });
 
   // Fetch product data for editing
@@ -100,7 +100,6 @@ export default function ProductForm({ product = null }) {
           basePrice: p.basePrice || '',
           category: p.category?._id || p.category || '',
           garmentType: p.garmentType || 'tshirt',
-          sizeType: p.sizeType || 'adult',
           productType: p.productType || 'half-sleeve',
           material: p.material || '',
           fabricType: p.fabricType || 'cotton',
@@ -134,6 +133,7 @@ export default function ProductForm({ product = null }) {
           metaDescription: p.metaDescription || '',
           keywords: p.keywords || [],
           lowStockThreshold: p.lowStockThreshold || 5,
+          sizeChart: p.sizeChart?.columns?.length ? p.sizeChart : EMPTY_SIZE_CHART,
         });
       }
     } catch (error) {
@@ -164,16 +164,7 @@ export default function ProductForm({ product = null }) {
       ...current,
       garmentType,
       productType: PRODUCT_TYPES[garmentType][0].value,
-      sizes: getDefaultSizeVariants(garmentType, current.sizeType),
-    }));
-  };
-
-  const handleSizeTypeChange = (e) => {
-    const sizeType = e.target.value;
-    setFormData((current) => ({
-      ...current,
-      sizeType,
-      sizes: getDefaultSizeVariants(current.garmentType, sizeType),
+      sizes: getDefaultSizeVariants(garmentType),
     }));
   };
 
@@ -189,7 +180,7 @@ export default function ProductForm({ product = null }) {
   };
 
   const addSize = () => {
-    const availableSizes = getSizeOptions(formData.garmentType, formData.sizeType);
+    const availableSizes = getSizeOptions(formData.garmentType);
     const usedSizes = formData.sizes.map(s => s.size);
     const nextSize = availableSizes.find(size => !usedSizes.includes(size));
 
@@ -207,6 +198,45 @@ export default function ProductForm({ product = null }) {
         }]
       });
     }
+  };
+
+  // Size chart: admin-defined columns and rows, every cell is free text.
+  const updateSizeChart = (changes) => {
+    setFormData((current) => ({ ...current, sizeChart: { ...current.sizeChart, ...changes } }));
+  };
+
+  const addChartColumn = () => {
+    const { columns, rows } = formData.sizeChart;
+    updateSizeChart({ columns: [...columns, ''], rows: rows.map(row => [...row, '']) });
+  };
+
+  const renameChartColumn = (columnIndex, value) => {
+    updateSizeChart({ columns: formData.sizeChart.columns.map((c, i) => (i === columnIndex ? value : c)) });
+  };
+
+  const removeChartColumn = (columnIndex) => {
+    const { columns, rows } = formData.sizeChart;
+    updateSizeChart({
+      columns: columns.filter((_, i) => i !== columnIndex),
+      rows: rows.map(row => row.filter((_, i) => i !== columnIndex)),
+    });
+  };
+
+  const addChartRow = () => {
+    const { columns, rows } = formData.sizeChart;
+    updateSizeChart({ rows: [...rows, columns.map(() => '')] });
+  };
+
+  const updateChartCell = (rowIndex, columnIndex, value) => {
+    updateSizeChart({
+      rows: formData.sizeChart.rows.map((row, r) =>
+        r === rowIndex ? row.map((cell, c) => (c === columnIndex ? value : cell)) : row
+      ),
+    });
+  };
+
+  const removeChartRow = (rowIndex) => {
+    updateSizeChart({ rows: formData.sizeChart.rows.filter((_, i) => i !== rowIndex) });
   };
 
   const removeSize = (index) => {
@@ -526,23 +556,6 @@ export default function ProductForm({ product = null }) {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Size Type <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="sizeType"
-                      value={formData.sizeType}
-                      onChange={handleSizeTypeChange}
-                      required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all appearance-none bg-white"
-                    >
-                      {SIZE_TYPES.map((type) => (
-                        <option key={type.value} value={type.value}>{type.label}</option>
-                      ))}
-                    </select>
-                    <p className="mt-1 text-xs text-amber-600">Kids = age-wise sizes (9/12-M ... 9/10-Y). Changing this resets size variants.</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Category <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -743,7 +756,7 @@ export default function ProductForm({ product = null }) {
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-medium">
-                  {getSizeLabel(formData.garmentType, formData.sizeType)}-wise Pricing
+                  {getSizeLabel(formData.garmentType)}-wise Pricing
                 </h2>
                 <button
                   type="button"
@@ -759,7 +772,7 @@ export default function ProductForm({ product = null }) {
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-medium">
-                        {getSizeLabel(formData.garmentType, formData.sizeType)} {sizeItem.size}
+                        {getSizeLabel(formData.garmentType)} {sizeItem.size}
                       </h3>
                       <button
                         type="button"
@@ -892,6 +905,96 @@ export default function ProductForm({ product = null }) {
                     <strong>Total Stock:</strong> {formData.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0)} units
                   </div>
                 </div>
+              )}
+            </div>
+
+            {/* Size Chart */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+                <h2 className="text-lg font-medium">Size Chart</h2>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={addChartColumn}
+                    className="px-4 py-2 border border-gray-300 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    + Add Column
+                  </button>
+                  <button
+                    type="button"
+                    onClick={addChartRow}
+                    disabled={formData.sizeChart.columns.length === 0}
+                    className="px-4 py-2 bg-black text-white text-sm rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                  >
+                    + Add Row
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mb-4">
+                Name the columns yourself (e.g. Size, Chest, Length) and fill in any values. Empty rows and columns are not saved.
+              </p>
+
+              {formData.sizeChart.columns.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm border border-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        {formData.sizeChart.columns.map((column, columnIndex) => (
+                          <th key={columnIndex} className="px-2 py-2 border-b border-gray-200 min-w-[120px]">
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="text"
+                                value={column}
+                                onChange={(e) => renameChartColumn(columnIndex, e.target.value)}
+                                placeholder="Column name"
+                                className="w-full px-2 py-1 border border-gray-300 rounded font-medium focus:ring-2 focus:ring-black outline-none"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeChartColumn(columnIndex)}
+                                className="text-red-500 hover:text-red-700 px-1"
+                                aria-label="Remove column"
+                              >
+                                &times;
+                              </button>
+                            </div>
+                          </th>
+                        ))}
+                        <th className="border-b border-gray-200 w-px"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {formData.sizeChart.rows.map((row, rowIndex) => (
+                        <tr key={rowIndex} className="border-b border-gray-100 last:border-b-0">
+                          {row.map((cell, columnIndex) => (
+                            <td key={columnIndex} className="px-2 py-2">
+                              <input
+                                type="text"
+                                value={cell}
+                                onChange={(e) => updateChartCell(rowIndex, columnIndex, e.target.value)}
+                                className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-black outline-none"
+                              />
+                            </td>
+                          ))}
+                          <td className="px-2 py-2 text-right">
+                            <button
+                              type="button"
+                              onClick={() => removeChartRow(rowIndex)}
+                              className="text-red-500 hover:text-red-700 text-sm"
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {formData.sizeChart.rows.length === 0 && (
+                    <p className="text-center text-gray-500 py-6">No rows yet. Click &quot;+ Add Row&quot; to start.</p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-center text-gray-500 py-6">No columns yet. Click &quot;+ Add Column&quot; to start.</p>
               )}
             </div>
 

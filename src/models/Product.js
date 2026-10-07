@@ -48,13 +48,6 @@ const ProductSchema = new mongoose.Schema({
     default: 'tshirt',
   },
 
-  // 'kids' products use age-wise sizes (9/12-M, 3/4-Y...) instead of adult sizes.
-  sizeType: {
-    type: String,
-    enum: ['adult', 'kids'],
-    default: 'adult',
-  },
-
   productType: {
     type: String,
     enum: ALL_PRODUCT_TYPES,
@@ -260,6 +253,19 @@ const ProductSchema = new mongoose.Schema({
   lowStockThreshold: {
     type: Number,
     default: 5,
+  },
+
+  // Free-form size chart built by the admin: column headings plus rows of cell
+  // text (e.g. columns ['Size', 'Chest'], rows [['S', '36'], ['M', '38']]).
+  sizeChart: {
+    columns: {
+      type: [String],
+      default: [],
+    },
+    rows: {
+      type: [[String]],
+      default: [],
+    },
   },
 
 }, {

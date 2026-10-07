@@ -3,7 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { authMiddleware } from '@/middleware/auth';
 import { deleteMultipleImages, uploadImage } from '@/lib/cloudinary';
-import { PRODUCT_TYPES, getSizeOptions } from '@/lib/product-config';
+import { PRODUCT_TYPES, LEGACY_KIDS_SIZES, getSizeOptions } from '@/lib/product-config';
 
 function normalizeProductData(data) {
   const garmentType = data.garmentType || 'tshirt';
@@ -17,14 +17,26 @@ function normalizeProductData(data) {
     throw new Error(`Please select a valid ${garmentType === 'trouser' ? 'trouser' : 'T-shirt'} type`);
   }
 
-  const sizeType = data.sizeType === 'kids' ? 'kids' : 'adult';
-  const allowedSizes = getSizeOptions(garmentType, sizeType);
+  // Legacy age-wise sizes stay valid so older products can still be saved.
+  const allowedSizes = [...getSizeOptions(garmentType), ...LEGACY_KIDS_SIZES];
   if (data.sizes?.some(({ size }) => !allowedSizes.includes(String(size)))) {
-    throw new Error(`One or more sizes are invalid for ${sizeType === 'kids' ? 'kids ' : ''}${garmentType === 'trouser' ? 'trousers' : 'T-shirts'}`);
+    throw new Error(`One or more sizes are invalid for ${garmentType === 'trouser' ? 'trousers' : 'T-shirts'}`);
   }
 
+  // Drop empty size chart columns/rows and keep every row the same width as the headings.
+  const chart = data.sizeChart || {};
+  const keep = (chart.columns || [])
+    .map((name, index) => ({ name: String(name ?? '').trim(), index }))
+    .filter(({ name, index }) => name || (chart.rows || []).some((row) => String(row?.[index] ?? '').trim()));
+  data.sizeChart = {
+    columns: keep.map(({ name }) => name),
+    rows: (chart.rows || [])
+      .map((row) => keep.map(({ index }) => String(row?.[index] ?? '').trim()))
+      .filter((row) => row.some(Boolean)),
+  };
+
   data.garmentType = garmentType;
-  data.sizeType = sizeType;
+  delete data.sizeType;
   data.basePrice = Number(data.basePrice);
   data.totalStock = (data.sizes || []).reduce((total, size) => total + (Number(size.stock) || 0), 0);
   return data;

@@ -48,13 +48,13 @@ export default function AdminDashboard() {
   if (loading) return <div className="h-96 flex items-center justify-center"><div className="w-4 h-4 border-2 border-black border-t-transparent animate-spin"></div></div>;
 
   return (
-    <div className="space-y-16 px-4">
+    <div className="space-y-10 md:space-y-16 px-4 py-6 md:px-8 md:py-10">
       <div className="flex flex-col gap-3">
-        <h1 className="text-5xl font-black uppercase tracking-tighter italic">Shop View</h1>
+        <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">Shop View</h1>
         <p className="text-[10px] uppercase tracking-[0.4em] text-gray-400 font-bold">Metrics & System Integrity</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-px bg-black/5 border border-black/5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-7 gap-px bg-black/5 border border-black/5">
         {[
           { label: 'Total units', val: stats.totalProducts, link: '/admin/products' },
           { label: 'T-Shirts', val: stats.tshirtProducts, link: '/admin/products?garmentType=tshirt' },
@@ -64,31 +64,31 @@ export default function AdminDashboard() {
           { label: 'Collections', val: stats.totalCategories, link: '/admin/categories' },
           { label: 'Messages', val: messages.length, link: '/admin/messages', note: unreadMessages > 0 ? `${unreadMessages} new` : null }
         ].map((s, i) => (
-          <Link key={i} href={s.link} className="bg-white p-8 hover:bg-[#fafafa] transition-colors group">
-            <p className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-400 mb-8 group-hover:text-black transition-colors">{s.label}</p>
-            <p className="text-5xl font-black tracking-tighter">{s.val}</p>
+          <Link key={i} href={s.link} className="bg-white p-4 md:p-6 xl:p-8 min-w-0 hover:bg-[#fafafa] transition-colors group">
+            <p className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-400 mb-4 md:mb-8 truncate group-hover:text-black transition-colors">{s.label}</p>
+            <p className="text-3xl md:text-4xl xl:text-5xl font-black tracking-tighter">{s.val}</p>
             {s.note && <p className="text-[9px] uppercase tracking-widest font-black text-red-500 mt-3">{s.note}</p>}
           </Link>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10">
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-[10px] uppercase tracking-[0.5em] font-black border-b border-black pb-4">Quick Commands</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link href="/admin/products/add?garmentType=tshirt" className="p-8 border border-black flex justify-between items-center group hover:bg-black hover:text-white transition-all duration-500">
+            <Link href="/admin/products/add?garmentType=tshirt" className="p-5 md:p-8 border border-black flex justify-between items-center group hover:bg-black hover:text-white transition-all duration-500">
               <span className="text-xs font-black uppercase tracking-[0.2em]">Add T-Shirt</span>
               <span className="text-xl group-hover:translate-x-2 transition-transform">→</span>
             </Link>
-            <Link href="/admin/products/add?garmentType=trouser" className="p-8 border border-black flex justify-between items-center group hover:bg-black hover:text-white transition-all duration-500">
+            <Link href="/admin/products/add?garmentType=trouser" className="p-5 md:p-8 border border-black flex justify-between items-center group hover:bg-black hover:text-white transition-all duration-500">
               <span className="text-xs font-black uppercase tracking-[0.2em]">Add Trouser</span>
               <span className="text-xl group-hover:translate-x-2 transition-transform">→</span>
             </Link>
-            <Link href="/admin/products" className="p-8 border border-black/10 flex justify-between items-center group hover:border-black transition-all">
+            <Link href="/admin/products" className="p-5 md:p-8 border border-black/10 flex justify-between items-center group hover:border-black transition-all">
               <span className="text-xs font-black uppercase tracking-[0.2em]">Audit Catalog</span>
               <span className="text-xl group-hover:translate-x-2 transition-transform">→</span>
             </Link>
-            <Link href="/admin/messages" className="p-8 border border-black/10 flex justify-between items-center group hover:border-black transition-all">
+            <Link href="/admin/messages" className="p-5 md:p-8 border border-black/10 flex justify-between items-center group hover:border-black transition-all">
               <span className="text-xs font-black uppercase tracking-[0.2em]">View Messages{unreadMessages > 0 && ` (${unreadMessages} new)`}</span>
               <span className="text-xl group-hover:translate-x-2 transition-transform">→</span>
             </Link>
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
-        <div className="bg-black p-10 text-white flex flex-col justify-between aspect-square lg:aspect-auto">
+        <div className="bg-black p-6 md:p-10 text-white flex flex-col justify-between gap-8 min-h-56 lg:min-h-0">
           <p className="text-[9px] uppercase tracking-[0.4em] opacity-40">Operational Status</p>
           <div className="space-y-4">
             <div className="flex justify-between text-[10px] uppercase tracking-widest border-b border-white/10 pb-2"><span>Network</span><span className="text-emerald-400">Stable</span></div>

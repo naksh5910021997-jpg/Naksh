@@ -101,7 +101,7 @@ export default function AdminLayout({ children }) {
       </aside>
 
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col h-full transition-all duration-500 ${isSidebarHovered ? 'md:pl-64' : 'md:pl-[70px]'}`}>
+      <div className={`flex-1 min-w-0 flex flex-col h-full transition-all duration-500 ${isSidebarHovered ? 'md:pl-64' : 'md:pl-[70px]'}`}>
         {/* Header */}
         <header className="h-20 bg-white/80 backdrop-blur-md border-b border-black/5 flex items-center justify-between px-6 md:px-8 sticky top-0 z-40">
           <button

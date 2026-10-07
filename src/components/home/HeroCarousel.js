@@ -67,13 +67,13 @@ export default function HeroCarousel({ slides }) {
       onKeyDown={handleKeyDown}
     >
       <div
-        className="flex h-lvh transition-transform duration-700 ease-out motion-reduce:transition-none"
+        className="flex h-full transition-transform duration-700 ease-out motion-reduce:transition-none"
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
         {slides.map((slide, index) => (
           <div
             key={slide.src}
-            className="relative w-full h-1vh shrink-0"
+            className="relative w-full h-full shrink-0"
             role="group"
             aria-roledescription="slide"
             aria-label={`${index + 1} of ${count}`}

@@ -425,8 +425,8 @@ export default function ProductForm({ product = null }) {
   return (
     <form onSubmit={handleSubmit} className="min-h-screen bg-gray-50">
       {/* Header - same as before */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 md:px-6 py-4">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold">
               {isEditing ? 'Edit Product' : `New ${formData.garmentType === 'trouser' ? 'Trouser' : 'T-Shirt'}`}
@@ -459,14 +459,14 @@ export default function ProductForm({ product = null }) {
 
       {/* Tab Navigation - same as before */}
       <div className="border-b border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <nav className="flex -mb-px space-x-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <nav className="flex -mb-px gap-6 md:gap-8 overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors ${activeTab === tab.id
+                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 shrink-0 whitespace-nowrap transition-colors ${activeTab === tab.id
                   ? 'border-black text-black'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
@@ -480,12 +480,12 @@ export default function ProductForm({ product = null }) {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
         {/* Core Info Tab - same as before but update SKU field */}
         {activeTab === 'core' && (
           <div className="space-y-8">
             {/* Basic Information - same as before */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Basic Information</h2>
               <div className="space-y-4">
                 <div>
@@ -621,7 +621,7 @@ export default function ProductForm({ product = null }) {
             </div>
 
             {/* Status & Visibility - same as before */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Status & Visibility</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
@@ -665,7 +665,7 @@ export default function ProductForm({ product = null }) {
             </div>
 
             {/* Features - same as before */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Product Features</h2>
               <div className="space-y-3">
                 {formData.features.map((feature, index) => (
@@ -714,7 +714,7 @@ export default function ProductForm({ product = null }) {
         {activeTab === 'pricing' && (
           <div className="space-y-8">
             {/* Base Price */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Base Pricing</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -753,7 +753,7 @@ export default function ProductForm({ product = null }) {
             </div>
 
             {/* Size-wise Pricing */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-medium">
                   {getSizeLabel(formData.garmentType)}-wise Pricing
@@ -777,7 +777,7 @@ export default function ProductForm({ product = null }) {
                       <button
                         type="button"
                         onClick={() => removeSize(index)}
-                        className="text-red-500 hover:text-red-700 text-sm"
+                        className="text-red-500 hover:text-red-700 text-sm whitespace-nowrap"
                       >
                         Remove
                       </button>
@@ -909,10 +909,10 @@ export default function ProductForm({ product = null }) {
             </div>
 
             {/* Size Chart */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
                 <h2 className="text-lg font-medium">Size Chart</h2>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={addChartColumn}
@@ -940,7 +940,7 @@ export default function ProductForm({ product = null }) {
                     <thead className="bg-gray-50">
                       <tr>
                         {formData.sizeChart.columns.map((column, columnIndex) => (
-                          <th key={columnIndex} className="px-2 py-2 border-b border-gray-200 min-w-[120px]">
+                          <th key={columnIndex} className="px-2 py-2 border-b border-gray-200 min-w-[110px]">
                             <div className="flex items-center gap-1">
                               <input
                                 type="text"
@@ -980,7 +980,7 @@ export default function ProductForm({ product = null }) {
                             <button
                               type="button"
                               onClick={() => removeChartRow(rowIndex)}
-                              className="text-red-500 hover:text-red-700 text-sm"
+                              className="text-red-500 hover:text-red-700 text-sm whitespace-nowrap"
                             >
                               Remove
                             </button>
@@ -999,7 +999,7 @@ export default function ProductForm({ product = null }) {
             </div>
 
             {/* Barcode */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Product Identifiers</h2>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1021,7 +1021,7 @@ export default function ProductForm({ product = null }) {
         {/* Specifications Tab - same as before */}
         {activeTab === 'specs' && (
           <div className="space-y-8">
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Material & Construction</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
@@ -1074,7 +1074,7 @@ export default function ProductForm({ product = null }) {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">
                 {formData.garmentType === 'trouser' ? 'Trouser Fit & Construction' : 'Fit & Style'}
               </h2>
@@ -1190,7 +1190,7 @@ export default function ProductForm({ product = null }) {
             </div>
 
             {/* Weight Section */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Product Weight</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -1234,7 +1234,7 @@ export default function ProductForm({ product = null }) {
         {/* Media Tab - same as before */}
         {activeTab === 'media' && (
           <div className="space-y-8">
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 <label className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 bg-gray-50">
                   <span className="text-3xl text-gray-400">+</span>
@@ -1261,7 +1261,7 @@ export default function ProductForm({ product = null }) {
         {/* // Main Content mein Colors ka Section */}
         {activeTab === 'colors' && (
           <div className="space-y-8">
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-medium">Product Colors</h2>
                 <button
@@ -1314,7 +1314,7 @@ export default function ProductForm({ product = null }) {
         {activeTab === 'inventory' && (
           <div className="space-y-8">
             {/* Stock Overview */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Stock Overview</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {formData.sizes.map((sizeItem, index) => (
@@ -1352,7 +1352,7 @@ export default function ProductForm({ product = null }) {
             </div>
 
             {/* Low Stock Settings */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Inventory Settings</h2>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1374,7 +1374,7 @@ export default function ProductForm({ product = null }) {
             </div>
 
             {/* Care Instructions */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Care Instructions</h2>
               <div className="space-y-3">
                 {formData.careInstructions.map((instruction, index) => (
@@ -1421,7 +1421,7 @@ export default function ProductForm({ product = null }) {
         {/* SEO Tab - same as before */}
         {activeTab === 'seo' && (
           <div className="space-y-8">
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Search Engine Optimization</h2>
               <div className="space-y-4">
                 <div>
@@ -1482,7 +1482,7 @@ export default function ProductForm({ product = null }) {
             </div>
 
             {/* SEO Preview */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
               <h2 className="text-lg font-medium mb-6">Search Preview</h2>
               <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                 <div className="text-blue-600 text-lg mb-1">

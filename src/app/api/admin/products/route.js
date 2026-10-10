@@ -17,10 +17,11 @@ function normalizeProductData(data) {
     throw new Error(`Please select a valid ${garmentType === 'trouser' ? 'trouser' : 'T-shirt'} type`);
   }
 
+  const sizeType = data.sizeType === 'kids' ? 'kids' : 'adult';
   // Legacy age-wise sizes stay valid so older products can still be saved.
-  const allowedSizes = [...getSizeOptions(garmentType), ...LEGACY_KIDS_SIZES];
+  const allowedSizes = [...getSizeOptions(garmentType, sizeType), ...LEGACY_KIDS_SIZES];
   if (data.sizes?.some(({ size }) => !allowedSizes.includes(String(size)))) {
-    throw new Error(`One or more sizes are invalid for ${garmentType === 'trouser' ? 'trousers' : 'T-shirts'}`);
+    throw new Error(`One or more sizes are invalid for ${sizeType === 'kids' ? 'kids ' : ''}${garmentType === 'trouser' ? 'trousers' : 'T-shirts'}`);
   }
 
   // Drop empty size chart columns/rows and keep every row the same width as the headings.
@@ -36,7 +37,7 @@ function normalizeProductData(data) {
   };
 
   data.garmentType = garmentType;
-  delete data.sizeType;
+  data.sizeType = sizeType;
   data.basePrice = Number(data.basePrice);
   data.totalStock = (data.sizes || []).reduce((total, size) => total + (Number(size.stock) || 0), 0);
   return data;

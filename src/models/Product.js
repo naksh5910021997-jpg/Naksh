@@ -48,6 +48,13 @@ const ProductSchema = new mongoose.Schema({
     default: 'tshirt',
   },
 
+  // 'kids' products use age-wise sizes (3/9 Months, 2/4 Years...) instead of adult sizes.
+  sizeType: {
+    type: String,
+    enum: ['adult', 'kids'],
+    default: 'adult',
+  },
+
   productType: {
     type: String,
     enum: ALL_PRODUCT_TYPES,

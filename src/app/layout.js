@@ -1,6 +1,7 @@
 import Script from 'next/script';
 import './globals.css';
 import { GTM_ID } from '@/lib/gtm';
+import AttributionCapture from '@/components/AttributionCapture';
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, BUSINESS } from '@/lib/seo';
 
 export const metadata = {
@@ -111,6 +112,7 @@ export default function RootLayout({ children }) {
             style={{ display: 'none', visibility: 'hidden' }}
           />
         </noscript>
+        <AttributionCapture />
         {children}
       </body>
     </html>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getEffectiveSizePrice, getEffectiveSizeComparePrice } from '@/lib/pricing';
 import { pushToDataLayer } from '@/lib/gtm';
+import { getAttribution, generateEventId, generateOrderRef } from '@/lib/attribution';
 import { BUSINESS } from '@/lib/seo';
 import SizeGuide from '@/components/products/SizeGuide';
 
@@ -41,11 +42,12 @@ export default function ProductPurchasePanel({ product }) {
     return (product.stock || 0) <= 0;
   };
 
-  const generateWhatsAppMessage = () => {
+  const generateWhatsAppMessage = (orderRef) => {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const productUrl = `${baseUrl}/products/${product.slug || product._id}`;
 
-    let message = `🛍️ *Order Inquiry - Naksh Shop*\n\n`;
+    let message = `🛍️ *Order Inquiry - Naksh Shop*\n`;
+    message += `*Order Ref:* ${orderRef}\n\n`;
     message += `*Product:* ${product.name}\n`;
     message += `*SKU:* ${product.productSku || product.sku || 'N/A'}\n`;
     message += `*Category:* ${product.category?.name || 'N/A'}\n`;
@@ -73,12 +75,17 @@ export default function ProductPurchasePanel({ product }) {
   };
 
   const handleWhatsAppOrder = () => {
+    const orderRef = generateOrderRef();
+    const eventId = generateEventId();
     const whatsappNumber = BUSINESS.whatsapp;
-    const message = generateWhatsAppMessage();
+    const message = generateWhatsAppMessage(orderRef);
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
 
+    // event_id lets Meta match this browser event with the server-side Lead.
     pushToDataLayer({
       event: 'generate_lead',
+      event_id: eventId,
+      order_ref: orderRef,
       ecommerce: {
         currency: 'PKR',
         value: currentPrice * quantity,
@@ -93,9 +100,29 @@ export default function ProductPurchasePanel({ product }) {
       },
     });
 
+    // Open WhatsApp first, synchronously in the click, so popup blockers allow it.
     const win = window.open(whatsappUrl, '_blank');
     // A null window means the popup was blocked, so WhatsApp never opened.
     setOrderStatus({ type: win ? 'success' : 'error', url: whatsappUrl });
+
+    // Record the pending order in the background. keepalive lets the request
+    // finish even if the page is left for WhatsApp.
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        orderRef,
+        eventId,
+        productId: product._id,
+        size: activeSize?.size,
+        color: selectedColor,
+        quantity,
+        tracking: getAttribution(),
+      }),
+    }).catch(() => {
+      // The order still reaches us on WhatsApp; only the record is lost.
+    });
   };
 
   const needsSizeSelection = sizes.length > 0 && !activeSize;

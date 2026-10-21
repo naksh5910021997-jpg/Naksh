@@ -2,12 +2,14 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import Category from '@/models/Category';
 import { SITE_URL } from '@/lib/seo';
+import { getLiveBundles } from '@/lib/bundles';
 
 export default async function sitemap() {
   const staticRoutes = [
     { url: `${SITE_URL}/`, changeFrequency: 'daily', priority: 1 },
     { url: `${SITE_URL}/products`, changeFrequency: 'daily', priority: 0.9 },
     { url: `${SITE_URL}/categories`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${SITE_URL}/bundles`, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${SITE_URL}/returns`, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${SITE_URL}/about`, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${SITE_URL}/shipping`, changeFrequency: 'monthly', priority: 0.4 },
@@ -17,9 +19,10 @@ export default async function sitemap() {
   try {
     await connectDB();
 
-    const [products, categories] = await Promise.all([
+    const [products, categories, bundles] = await Promise.all([
       Product.find({ status: 'active' }).select('slug _id updatedAt').lean(),
       Category.find().select('slug updatedAt').lean(),
+      getLiveBundles(),
     ]);
 
     const productRoutes = products.map((product) => ({
@@ -36,7 +39,14 @@ export default async function sitemap() {
       priority: 0.6,
     }));
 
-    return [...staticRoutes, ...productRoutes, ...categoryRoutes];
+    const bundleRoutes = bundles.map((bundle) => ({
+      url: `${SITE_URL}/bundles/${bundle.slug}`,
+      lastModified: bundle.updatedAt || new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    }));
+
+    return [...staticRoutes, ...productRoutes, ...categoryRoutes, ...bundleRoutes];
   } catch (error) {
     console.error('Sitemap generation error:', error);
     return staticRoutes;

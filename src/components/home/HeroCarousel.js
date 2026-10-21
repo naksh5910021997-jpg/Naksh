@@ -1,10 +1,38 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
+import { getImageProps } from 'next/image';
 
 const AUTOPLAY_MS = 5000;
 const SWIPE_THRESHOLD = 50;
+// Matches Tailwind's md breakpoint used for the banner's aspect ratio below.
+const DESKTOP_MEDIA = '(min-width: 768px)';
+
+// Art-directed banner: <picture> lets the browser pick and download only the
+// desktop or the mobile file. next/image's priority/preload can't be used here
+// (it would preload one variant on every screen), so the first slide gets
+// eager loading + high fetch priority instead.
+function BannerPicture({ slide, isFirst }) {
+  const common = { alt: slide.alt, sizes: '100vw' };
+  const {
+    props: { srcSet: desktopSrcSet },
+  } = getImageProps({ ...common, ...slide.desktop });
+  const {
+    props: { srcSet: mobileSrcSet, ...imgProps },
+  } = getImageProps({
+    ...common,
+    ...slide.mobile,
+    loading: isFirst ? 'eager' : 'lazy',
+    fetchPriority: isFirst ? 'high' : 'auto',
+  });
+
+  return (
+    <picture>
+      <source media={DESKTOP_MEDIA} srcSet={desktopSrcSet} />
+      <img {...imgProps} alt={slide.alt} srcSet={mobileSrcSet} className="absolute inset-0 w-full h-full object-cover" />
+    </picture>
+  );
+}
 
 // Full-width banner slider: auto-advances, pauses on hover/focus, supports
 // arrows, dots, keyboard and touch swipe. Autoplay is off for reduced motion.
@@ -54,7 +82,7 @@ export default function HeroCarousel({ slides }) {
 
   return (
     <div
-      className="relative w-full aspect-video max-h-[calc(100svh-5rem)] overflow-hidden group"
+      className="relative w-full aspect-9/16 md:aspect-video max-h-[calc(100svh-5rem)] overflow-hidden group"
       role="region"
       aria-roledescription="carousel"
       aria-label="Featured offers"
@@ -72,21 +100,14 @@ export default function HeroCarousel({ slides }) {
       >
         {slides.map((slide, index) => (
           <div
-            key={slide.src}
+            key={slide.desktop.src}
             className="relative w-full h-full shrink-0"
             role="group"
             aria-roledescription="slide"
             aria-label={`${index + 1} of ${count}`}
             aria-hidden={index !== current}
           >
-            <Image
-              src={slide.src}
-              alt={slide.alt}
-              fill
-              priority={index === 0}
-              className="object-cover"
-              sizes="100vw"
-            />
+            <BannerPicture slide={slide} isFirst={index === 0} />
           </div>
         ))}
       </div>
@@ -117,7 +138,7 @@ export default function HeroCarousel({ slides }) {
           <div className="absolute bottom-3 md:bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
             {slides.map((slide, index) => (
               <button
-                key={slide.src}
+                key={slide.desktop.src}
                 type="button"
                 onClick={() => goTo(index)}
                 aria-label={`Go to banner ${index + 1}`}

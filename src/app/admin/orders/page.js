@@ -122,6 +122,13 @@ function OrderCard({ order, onUpdated, onDeleted }) {
         <p className="text-xl font-black">Rs {order.subtotal}</p>
       </div>
 
+      {order.bundle?.title && (
+        <p className="text-xs">
+          <span className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 bg-black text-white mr-2">Combo</span>
+          <strong>{order.bundle.title}</strong> • {order.bundle.optionLabel} • Rs {order.bundle.unitPrice} each
+        </p>
+      )}
+
       <ul className="text-xs space-y-1">
         {order.items.map((item, i) => (
           <li key={i}>
@@ -132,6 +139,9 @@ function OrderCard({ order, onUpdated, onDeleted }) {
             {item.sku && <span className="text-gray-400"> • {item.sku}</span>}
           </li>
         ))}
+        {order.discount > 0 && (
+          <li className="text-green-600 font-bold">Combo discount −Rs {order.discount}</li>
+        )}
       </ul>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

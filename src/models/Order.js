@@ -19,6 +19,15 @@ const OrderSchema = new mongoose.Schema({
   orderRef: { type: String, required: true, unique: true, uppercase: true, trim: true },
 
   items: { type: [OrderItemSchema], required: true },
+  // Set when the order is a combo: items keep their separate prices and
+  // discount is the combo saving, so subtotal = items total - discount.
+  bundle: {
+    bundle: { type: mongoose.Schema.Types.ObjectId, ref: 'Bundle' },
+    title: String,
+    optionLabel: String,
+    unitPrice: Number,
+  },
+  discount: { type: Number, default: 0, min: 0 },
   subtotal: { type: Number, required: true, min: 0 },
   currency: { type: String, default: 'PKR' },
 

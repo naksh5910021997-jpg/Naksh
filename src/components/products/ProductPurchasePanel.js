@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getEffectiveSizePrice, getEffectiveSizeComparePrice } from '@/lib/pricing';
 import { pushToDataLayer } from '@/lib/gtm';
-import { getAttribution, generateEventId, generateOrderRef } from '@/lib/attribution';
+import { startWhatsAppOrder } from '@/lib/whatsapp-order';
 import { BUSINESS } from '@/lib/seo';
 import SizeGuide from '@/components/products/SizeGuide';
 
@@ -71,58 +71,25 @@ export default function ProductPurchasePanel({ product }) {
     message += `*Product Link:* ${productUrl}\n\n`;
     message += `Please confirm availability and provide delivery details. Thank you! 🙏`;
 
-    return encodeURIComponent(message);
+    return message;
   };
 
   const handleWhatsAppOrder = () => {
-    const orderRef = generateOrderRef();
-    const eventId = generateEventId();
-    const whatsappNumber = BUSINESS.whatsapp;
-    const message = generateWhatsAppMessage(orderRef);
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-
-    // event_id lets Meta match this browser event with the server-side Lead.
-    pushToDataLayer({
-      event: 'generate_lead',
-      event_id: eventId,
-      order_ref: orderRef,
-      ecommerce: {
-        currency: 'PKR',
-        value: currentPrice * quantity,
-        items: [{
-          item_id: product._id,
-          item_name: product.name,
-          item_category: product.category?.name,
-          item_variant: activeSize?.size,
-          price: currentPrice,
-          quantity,
-        }],
-      },
-    });
-
-    // Open WhatsApp first, synchronously in the click, so popup blockers allow it.
-    const win = window.open(whatsappUrl, '_blank');
-    // A null window means the popup was blocked, so WhatsApp never opened.
-    setOrderStatus({ type: win ? 'success' : 'error', url: whatsappUrl });
-
-    // Record the pending order in the background. keepalive lets the request
-    // finish even if the page is left for WhatsApp.
-    fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      keepalive: true,
-      body: JSON.stringify({
-        orderRef,
-        eventId,
-        productId: product._id,
-        size: activeSize?.size,
-        color: selectedColor,
+    const { opened, url } = startWhatsAppOrder({
+      buildMessage: generateWhatsAppMessage,
+      order: { productId: product._id, size: activeSize?.size, color: selectedColor, quantity },
+      value: currentPrice * quantity,
+      items: [{
+        item_id: product._id,
+        item_name: product.name,
+        item_category: product.category?.name,
+        item_variant: activeSize?.size,
+        price: currentPrice,
         quantity,
-        tracking: getAttribution(),
-      }),
-    }).catch(() => {
-      // The order still reaches us on WhatsApp; only the record is lost.
+      }],
     });
+    // Not opened means the popup was blocked, so WhatsApp never opened.
+    setOrderStatus({ type: opened ? 'success' : 'error', url });
   };
 
   const needsSizeSelection = sizes.length > 0 && !activeSize;

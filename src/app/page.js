@@ -7,21 +7,28 @@ import Product from '@/models/Product';
 import Category from '@/models/Category';
 import Image from 'next/image';
 import HeroCarousel from '@/components/home/HeroCarousel';
+import BundleCard from '@/components/bundles/BundleCard';
 import { getProductPrice, getComparePrice, isProductOnSale } from '@/lib/pricing';
+import { getLiveBundles } from '@/lib/bundles';
 
 export const dynamic = 'force-dynamic';
 
+// Each slide has a landscape desktop banner and a portrait mobile banner; the
+// browser downloads only the one that matches the screen.
 const HERO_SLIDES = [
   {
-    src: '/nakshshop-banner1.png',
+    desktop: { src: '/nakshshop-banner1.png', width: 1671, height: 941 },
+    mobile: { src: '/nakshshop-banner1-mobile.png', width: 940, height: 1672 },
     alt: 'Buy 2, Save More — mix & match kids tees and trousers, bundle pricing now live.',
   },
   {
-    src: '/nakshshop-banner2.png',
-    alt: 'Naksh Kids Fashion — Trouser & Tee Combo, 10% off. Comfort, style, everyday.',
+    desktop: { src: '/nakshshop-banner2.png', width: 1672, height: 940 },
+    mobile: { src: '/nakshshop-banner2-mobile.png', width: 940, height: 1672 },
+    alt: 'Naksh Kids Fashion — comfortable kids trouser & tee sets, 10% off.',
   },
   {
-    src: '/nakshshop-banner3.jpg',
+    desktop: { src: '/nakshshop-banner3.jpg', width: 1360, height: 784 },
+    mobile: { src: '/nakshshop-banner3-mobile.png', width: 940, height: 1672 },
     alt: 'Weekend-Ready, Every Day — kids outfits for playgrounds and park days. 10% off and free delivery.',
   },
 ];
@@ -31,12 +38,17 @@ async function getHomeData() {
     await connectDB();
 
     // Multiple collections in one query for better performance
-    const [featuredProducts, newProducts, trendingProducts, categories] = await Promise.all([
+    const [featuredProducts, newProducts, trendingProducts, categories, comboBundles] = await Promise.all([
       Product.find({ featured: true, status: 'active' }).limit(8).lean(),
       Product.find({ status: 'active' }).sort({ createdAt: -1 }).limit(8).lean(),
       // FIXED: Proper trending logic using your schema fields
       getTrendingProducts(),
-      Category.find().sort({ name: 1 }).lean()
+      Category.find().sort({ name: 1 }).lean(),
+      // Combos marked "Show on homepage"; a failure here shouldn't blank the page.
+      getLiveBundles({ featured: true }, 4).catch((error) => {
+        console.error('Home combos error:', error);
+        return [];
+      }),
     ]);
 
     return {
@@ -44,10 +56,11 @@ async function getHomeData() {
       newProducts: JSON.parse(JSON.stringify(newProducts)),
       trendingProducts: JSON.parse(JSON.stringify(trendingProducts)),
       categories: JSON.parse(JSON.stringify(categories)),
+      comboBundles,
     };
   } catch (error) {
     console.error('Build Data Error:', error);
-    return { featuredProducts: [], newProducts: [], trendingProducts: [], categories: [] };
+    return { featuredProducts: [], newProducts: [], trendingProducts: [], categories: [], comboBundles: [] };
   }
 }
 
@@ -125,7 +138,7 @@ async function getTrendingProducts() {
 }
 
 export default async function HomePage() {
-  const { featuredProducts, newProducts, trendingProducts, categories } = await getHomeData();
+  const { featuredProducts, newProducts, trendingProducts, categories, comboBundles } = await getHomeData();
 
   return (
     <div className="bg-main-bg min-h-screen font-sans">
@@ -159,6 +172,32 @@ export default async function HomePage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12">
               {newProducts.slice(0, 4).map((product) => (
                 <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* COMBO DEALS SECTION */}
+      {comboBundles.length > 0 && (
+        <section className="py-20 bg-card-bg border-t border-accent-dim">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center gap-4 mb-12">
+              <h2 className="text-xs uppercase font-black tracking-[0.4em] text-text">Sets</h2>
+              <div className="h-[1px] flex-grow bg-accent-dim"></div>
+              <span className="text-[10px] font-mono text-text opacity-60">COMBO DEALS</span>
+            </div>
+
+            <div className="flex justify-between items-end mb-8">
+              <h3 className="text-4xl font-black uppercase tracking-tighter text-text">Complete<br/>The Set</h3>
+              <Link href="/bundles" className="text-[10px] uppercase font-bold tracking-widest border-b border-text pb-1 text-text hover:opacity-60 transition-opacity">
+                All Combos
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-12">
+              {comboBundles.map((bundle) => (
+                <BundleCard key={bundle._id} bundle={bundle} />
               ))}
             </div>
           </div>

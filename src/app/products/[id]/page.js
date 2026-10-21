@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import Script from 'next/script';
 import Navbar from '@/components/ui/Navbar';
 import Footer from '@/components/ui/Footer';
@@ -10,6 +11,8 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { SITE_URL } from '@/lib/seo';
 import { getProductPrice, getComparePrice } from '@/lib/pricing';
+import { getBundleSummary } from '@/lib/bundle-pricing';
+import { getLiveBundlesForProduct } from '@/lib/bundles';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,6 +74,11 @@ export default async function ProductDetailPage({ params }) {
   const product = await getProduct(id);
 
   if (!product) notFound();
+  // A combo lookup failure just hides the "complete the set" box.
+  const bundles = await getLiveBundlesForProduct(product._id).catch((error) => {
+    console.error('Product combos error:', error);
+    return [];
+  });
 // console.log('Product data:', product); // Debugging line to check the product data
   const price = getProductPrice(product);
   const totalStock = product.sizes?.length
@@ -168,6 +176,37 @@ export default async function ProductDetailPage({ params }) {
 
             {/* Price, Size/Color Selection, Quantity & Order */}
             <ProductPurchasePanel product={product} />
+
+            {/* Combos that include this product */}
+            {bundles.length > 0 && (
+              <div className="border border-text rounded-md p-5 space-y-4">
+                <h3 className="text-[10px] uppercase tracking-widest font-black text-text">
+                  Complete the set &amp; save
+                </h3>
+                {bundles.map((bundle) => {
+                  const { fromPrice, maxSavings, options } = getBundleSummary(bundle);
+                  const partner = String(bundle.tshirt._id) === String(product._id) ? bundle.trouser : bundle.tshirt;
+                  return (
+                    <Link key={bundle._id} href={`/bundles/${bundle.slug}`} className="flex items-center gap-4 group">
+                      <div className="relative w-14 h-16 shrink-0 bg-card-bg border border-accent-dim rounded-sm overflow-hidden">
+                        {partner.images?.[0]?.url && (
+                          <Image src={partner.images[0].url} alt={partner.name} fill className="object-cover" sizes="56px" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-black uppercase tracking-tight text-text truncate group-hover:underline">{bundle.title}</p>
+                        <p className="text-[10px] text-text opacity-70">+ {partner.name}</p>
+                        <p className="text-[11px] font-bold text-text">
+                          {options.length > 1 ? 'From ' : ''}Rs {fromPrice}
+                          {maxSavings > 0 && <span className="text-green-600"> • Save up to Rs {maxSavings}</span>}
+                        </p>
+                      </div>
+                      <span className="text-text text-lg" aria-hidden="true">→</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
 
 
             {/* Features */}

@@ -50,6 +50,7 @@ export default function Navbar() {
     { href: '/', label: 'Home' },
     { href: '/products?garmentType=tshirt', label: 'T-Shirts' },
     { href: '/products?garmentType=trouser', label: 'Trousers' },
+    { href: '/bundles', label: 'Combos' },
     { href: '/categories', label: 'Categories' },
     { href: '/contact', label: 'Contact' },
   ];
